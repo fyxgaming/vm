@@ -98,8 +98,3 @@ func (file *File) Build() (output *bt.Output, err error) {
 
 	return
 }
-
-type TxnContext struct {
-	Txid     []byte
-	Contexts []*ExecContext
-}
