@@ -11,7 +11,7 @@ func Initialize() (retCode int) {
 		return this.Return(err)
 	}
 
-	this.Mint(this.Instance.Origin, "Init", this.CallData)
+	this.Spawn(this.Instance.Origin, "Init", this.CallData)
 	this.Destroy()
 
 	return this.Return(nil)

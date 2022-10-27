@@ -1,9 +1,10 @@
 package main
 
 import (
-	"encoding/binary"
+	"encoding/base64"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/fyxgaming/vm/lib"
 	"github.com/fyxgaming/vm/token/types"
@@ -20,7 +21,7 @@ func Init() (retCode int) {
 	}
 
 	mintReq := types.MintReq{}
-	err = easyjson.Unmarshal(this.CallData, &mintReq)
+	err = easyjson.Unmarshal([]byte(this.CallData), &mintReq)
 	if err != nil {
 		return this.Return(err)
 	}
@@ -31,12 +32,12 @@ func Init() (retCode int) {
 		return this.Return(fmt.Errorf("invalid-parent"))
 	}
 
-	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, mintReq.Supply)
+	this.Instance.Storage = strconv.FormatUint(mintReq.Supply, 10)
 	this.Instance.Lock = mintReq.Lock
 	this.Instance.Satoshis = 1
 
 	log.Println("Emit")
-	this.Emit("transfer", [][]byte{{}, mintReq.Lock})
+	this.Emit("transfer", []string{"", base64.StdEncoding.EncodeToString(mintReq.Lock)})
 
 	log.Println("Done")
 	return this.Return(nil)
@@ -53,26 +54,34 @@ func Send() int {
 		return this.Return(fmt.Errorf("invalid-send"))
 	}
 
-	balance := binary.BigEndian.Uint64(this.Instance.Storage)
-	for _, sibling := range this.Stack {
-		if !sibling.Instance.Kind.Equal(*this.Contract) {
+	balance, err := strconv.ParseUint(this.Instance.Storage, 10, 64)
+	if err != nil {
+		return this.Return(err)
+	}
+
+	for _, exec := range this.Stack {
+		if !exec.Instance.Kind.Equal(*this.Contract) {
 			continue
 		}
-		for _, e := range sibling.Events {
+		for _, e := range exec.Events {
 			if e.Id != "combine" || len(e.Topics) < 2 {
 				continue
 			}
 
-			if this.Instance.Outpoint.Equal(e.Topics[0]) {
+			if this.Instance.Outpoint.String() == e.Topics[0] {
 				log.Println("COMBINE", e.Topics)
-				balance += binary.BigEndian.Uint64(e.Topics[1])
+				amount, err := strconv.ParseUint(e.Topics[1], 10, 64)
+				if err != nil {
+					return this.Return(err)
+				}
+				balance += amount
 			}
 		}
 	}
 
 	var sendReq types.SendReq
 	if len(this.CallData) > 0 {
-		err = easyjson.Unmarshal(this.CallData, &sendReq)
+		err = easyjson.Unmarshal([]byte(this.CallData), &sendReq)
 		if err != nil {
 			return this.Return(err)
 		}
@@ -86,22 +95,22 @@ func Send() int {
 			}
 			balance -= send.Amount
 
-			this.Emit("transfer", [][]byte{
-				send.To,
-				this.Instance.Lock,
-				binary.BigEndian.AppendUint64([]byte{}, send.Amount),
+			this.Emit("transfer", []string{
+				base64.StdEncoding.EncodeToString(send.To),
+				base64.StdEncoding.EncodeToString(this.Instance.Lock),
+				strconv.FormatUint(send.Amount, 10),
 			})
 
 			sendData, err := send.MarshalJSON()
 			if err != nil {
 				return this.Return(err)
 			}
-			this.Mint(this.Contract, "recv", sendData)
+			this.Spawn(this.Contract, "recv", string(sendData))
 
 		}
 	}
 
-	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, balance)
+	this.Instance.Storage = strconv.FormatUint(balance, 10)
 	if balance == 0 {
 		this.Destroy()
 	}
@@ -122,13 +131,13 @@ func recv() int {
 	}
 
 	var send types.Send
-	err = easyjson.Unmarshal(this.CallData, &send)
+	err = easyjson.Unmarshal([]byte(this.CallData), &send)
 	if err != nil {
 		return this.Return(err)
 	}
 
 	this.Instance.Satoshis = 1
-	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, send.Amount)
+	this.Instance.Storage = strconv.FormatUint(send.Amount, 10)
 	this.Instance.Lock = send.To
 
 	return this.Return(nil)
@@ -145,9 +154,15 @@ func Combine() int {
 		return this.Return(fmt.Errorf("invalid-combine"))
 	}
 
-	balance := binary.BigEndian.Uint64(this.Instance.Storage)
+	balance, err := strconv.ParseUint(this.Instance.Storage, 10, 64)
+	if err != nil {
+		return this.Return(err)
+	}
 
-	this.Emit("combine", [][]byte{this.CallData, binary.BigEndian.AppendUint64([]byte{}, balance)})
+	this.Emit("combine", []string{
+		this.CallData,
+		strconv.FormatUint(balance, 10),
+	})
 
 	this.Destroy()
 	return this.Return(nil)

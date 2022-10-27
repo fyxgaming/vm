@@ -27,13 +27,13 @@ type Instance struct {
 	Kind     *Outpoint `json:"kind,omitempty"`
 	Satoshis uint64    `json:"sats"`
 	Lock     []byte    `json:"lock"`
-	Storage  []byte    `json:"store,omitempty"`
+	Storage  string    `json:"store,omitempty"`
 }
 
-type Spawn struct {
+type Child struct {
 	Contract *Outpoint `json:"contract"`
 	Method   string    `json:"method"`
-	CallData []byte    `json:"callData"`
+	CallData string    `json:"callData"`
 }
 
 type Parent struct {
@@ -47,7 +47,7 @@ type Parent struct {
 
 type Event struct {
 	Id     string   `json:"id"`
-	Topics [][]byte `json:"topics"`
+	Topics []string `json:"topics"`
 }
 
 type Error struct {

@@ -24,6 +24,15 @@ func NewOutpointFromBytes(b []byte) *Outpoint {
 	return (*Outpoint)(&o)
 }
 
+func NewOutpointFromString(s string) (*Outpoint, error) {
+	b, err := hex.DecodeString(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return (*Outpoint)(&b), nil
+}
+
 func (o Outpoint) Txid() []byte {
 	return o[:32]
 }
