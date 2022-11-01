@@ -17,7 +17,7 @@ type ExecContext struct {
 	Parent   *Parent        `json:"parent,omitempty"`
 	Instance *Instance      `json:"instance"`
 	Events   []*Event       `json:"events,omitempty"`
-	Children []*Child       `json:"spawn,omitempty"`
+	Children []*Child       `json:"children,omitempty"`
 }
 
 func (exec *ExecContext) Return(err error) (retCode int) {

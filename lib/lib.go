@@ -20,7 +20,15 @@ func Initialize() (exec *ExecContext, err error) {
 	return
 }
 
+type Txo struct {
+	Outpoint *Outpoint `json:"outpoint,omitempty"`
+	Satoshis uint64    `json:"sats"`
+	Lock     []byte    `json:"lock"`
+	Script   *bscript.Script
+}
+
 type Instance struct {
+	Txo      *Txo      `json:"txo"`
 	Outpoint *Outpoint `json:"outpoint,omitempty"`
 	Origin   *Outpoint `json:"origin,omitempty"`
 	Nonce    uint64    `json:"nonce,omitempty"`

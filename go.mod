@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/libsv/go-bt/v2 v2.1.0-beta.4
 	github.com/mailru/easyjson v0.7.7
+	golang.org/x/exp v0.0.0-20221028150844-83b7d23a625f
 )
 
 require (
