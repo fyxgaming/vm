@@ -12,8 +12,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// Populate with Xp Contract
-const Xp string = ""
+// Populate with XP Contract
+const XP string = "" //fyx:cryptofights/xp
 
 var Validator []byte = []byte{}
 
@@ -65,7 +65,7 @@ func RecordBattle() (retCode int) {
 	for _, exec := range this.Stack {
 		for _, e := range exec.Events {
 			if e.Id != "claim-xp" ||
-				exec.Contract.String() != Xp ||
+				exec.Contract.String() != XP ||
 				e.Topics[0] != this.Instance.Outpoint.String() ||
 				!bytes.Equal(Validator, exec.Parent.Lock) {
 
@@ -149,15 +149,7 @@ func LevelUp() (retCode int) {
 			return this.Return(fmt.Errorf("insufficient-level"))
 		}
 		for _, reqSkill := range skillInfo.RequiredSkills {
-			if slices.Contains(fighter.Skills, reqSkill)
-			found := false
-			for _, skill := range fighter.Skills {
-				if reqSkill == skill {
-					found = true
-					break
-				}
-			}
-			if !found {
+			if !slices.Contains(fighter.Skills, reqSkill) {
 				return this.Return(fmt.Errorf("missing-required-skill"))
 			}
 		}

@@ -4,7 +4,7 @@ package types
 
 import (
 	json "encoding/json"
-	skilltype "github.com/fyxgaming/vm/fighter/types/skilltype"
+	skills "github.com/fyxgaming/vm/fighter/types/skills"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -40,7 +40,7 @@ func easyjson6601e8cdDecodeGithubComFyxgamingVmFighterTypes(in *jlexer.Lexer, ou
 		case "ability":
 			out.Ability = int32(in.Int32())
 		case "skillType":
-			out.SkillType = int32(in.Int32())
+			out.SkillType = skills.SkillType(in.Int32())
 		default:
 			in.SkipRecursive()
 		}
@@ -113,7 +113,7 @@ func easyjson6601e8cdDecodeGithubComFyxgamingVmFighterTypes1(in *jlexer.Lexer, o
 		case "name":
 			out.Name = string(in.String())
 		case "race":
-			out.Race = int32(in.Int32())
+			out.Race = Race(in.Int32())
 		case "abilityScores":
 			if in.IsNull() {
 				in.Skip()
@@ -147,16 +147,16 @@ func easyjson6601e8cdDecodeGithubComFyxgamingVmFighterTypes1(in *jlexer.Lexer, o
 				in.Delim('[')
 				if out.Skills == nil {
 					if !in.IsDelim(']') {
-						out.Skills = make([]skilltype.SkillType, 0, 16)
+						out.Skills = make([]skills.SkillType, 0, 16)
 					} else {
-						out.Skills = []skilltype.SkillType{}
+						out.Skills = []skills.SkillType{}
 					}
 				} else {
 					out.Skills = (out.Skills)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v2 skilltype.SkillType
-					v2 = skilltype.SkillType(in.Int32())
+					var v2 skills.SkillType
+					v2 = skills.SkillType(in.Int32())
 					out.Skills = append(out.Skills, v2)
 					in.WantComma()
 				}

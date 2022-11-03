@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/fyxgaming/vm/lib"
-	"github.com/fyxgaming/vm/xp/types"
+	"github.com/fyxgaming/vm/receipt/types"
 	"github.com/mailru/easyjson"
 )
 
@@ -17,7 +17,7 @@ func Grant() (retCode int) {
 		return this.Return(err)
 	}
 
-	grant := types.XpGrant{}
+	grant := types.BattleReceipt{}
 	err = easyjson.Unmarshal([]byte(this.CallData), &grant)
 	if err != nil {
 		return this.Return(err)
@@ -35,7 +35,7 @@ func Claim() (retCode int) {
 		return this.Return(err)
 	}
 
-	grant := types.XpGrant{}
+	grant := types.BattleReceipt{}
 	err = easyjson.Unmarshal([]byte(this.Instance.Storage), &grant)
 	if err != nil {
 		return this.Return(err)

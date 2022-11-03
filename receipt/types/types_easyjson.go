@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson6601e8cdDecodeGithubComFyxgamingVmXpTypes(in *jlexer.Lexer, out *XpGrant) {
+func easyjson6601e8cdDecodeGithubComFyxgamingVmXpTypes(in *jlexer.Lexer, out *BattleReceipt) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -52,6 +52,10 @@ func easyjson6601e8cdDecodeGithubComFyxgamingVmXpTypes(in *jlexer.Lexer, out *Xp
 			} else {
 				out.Lock = in.Bytes()
 			}
+		case "win":
+			out.Win = bool(in.Bool())
+		case "pvp":
+			out.PvP = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -62,7 +66,7 @@ func easyjson6601e8cdDecodeGithubComFyxgamingVmXpTypes(in *jlexer.Lexer, out *Xp
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGithubComFyxgamingVmXpTypes(out *jwriter.Writer, in XpGrant) {
+func easyjson6601e8cdEncodeGithubComFyxgamingVmXpTypes(out *jwriter.Writer, in BattleReceipt) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -81,29 +85,39 @@ func easyjson6601e8cdEncodeGithubComFyxgamingVmXpTypes(out *jwriter.Writer, in X
 		out.RawString(prefix)
 		out.Base64Bytes(in.Lock)
 	}
+	{
+		const prefix string = ",\"win\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.Win))
+	}
+	{
+		const prefix string = ",\"pvp\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.PvP))
+	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v XpGrant) MarshalJSON() ([]byte, error) {
+func (v BattleReceipt) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson6601e8cdEncodeGithubComFyxgamingVmXpTypes(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v XpGrant) MarshalEasyJSON(w *jwriter.Writer) {
+func (v BattleReceipt) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson6601e8cdEncodeGithubComFyxgamingVmXpTypes(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *XpGrant) UnmarshalJSON(data []byte) error {
+func (v *BattleReceipt) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson6601e8cdDecodeGithubComFyxgamingVmXpTypes(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *XpGrant) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *BattleReceipt) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson6601e8cdDecodeGithubComFyxgamingVmXpTypes(l, v)
 }
