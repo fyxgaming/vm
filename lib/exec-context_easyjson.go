@@ -4,6 +4,7 @@ package lib
 
 import (
 	json "encoding/json"
+	bscript "github.com/libsv/go-bt/v2/bscript"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -37,7 +38,7 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib(in *jlexer.Lexer, out *ExecCo
 		}
 		switch key {
 		case "action":
-			out.Action = string(in.String())
+			out.Action = Action(in.Uint8())
 		case "contract":
 			if in.IsNull() {
 				in.Skip()
@@ -56,7 +57,12 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib(in *jlexer.Lexer, out *ExecCo
 		case "method":
 			out.Method = string(in.String())
 		case "callData":
-			out.CallData = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.CallData = nil
+			} else {
+				out.CallData = in.Bytes()
+			}
 		case "stack":
 			if in.IsNull() {
 				in.Skip()
@@ -73,31 +79,23 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib(in *jlexer.Lexer, out *ExecCo
 					out.Stack = (out.Stack)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v2 *ExecContext
+					var v3 *ExecContext
 					if in.IsNull() {
 						in.Skip()
-						v2 = nil
+						v3 = nil
 					} else {
-						if v2 == nil {
-							v2 = new(ExecContext)
+						if v3 == nil {
+							v3 = new(ExecContext)
 						}
-						(*v2).UnmarshalEasyJSON(in)
+						(*v3).UnmarshalEasyJSON(in)
 					}
-					out.Stack = append(out.Stack, v2)
+					out.Stack = append(out.Stack, v3)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
 		case "parent":
-			if in.IsNull() {
-				in.Skip()
-				out.Parent = nil
-			} else {
-				if out.Parent == nil {
-					out.Parent = new(Parent)
-				}
-				easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in, out.Parent)
-			}
+			out.Parent = int32(in.Int32())
 		case "instance":
 			if in.IsNull() {
 				in.Skip()
@@ -106,7 +104,7 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib(in *jlexer.Lexer, out *ExecCo
 				if out.Instance == nil {
 					out.Instance = new(Instance)
 				}
-				easyjsonE910b2f5DecodeGithubComFyxgamingVmLib2(in, out.Instance)
+				easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in, out.Instance)
 			}
 		case "events":
 			if in.IsNull() {
@@ -124,22 +122,22 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib(in *jlexer.Lexer, out *ExecCo
 					out.Events = (out.Events)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v3 *Event
+					var v4 *Event
 					if in.IsNull() {
 						in.Skip()
-						v3 = nil
+						v4 = nil
 					} else {
-						if v3 == nil {
-							v3 = new(Event)
+						if v4 == nil {
+							v4 = new(Event)
 						}
-						easyjsonE910b2f5DecodeGithubComFyxgamingVmLib3(in, v3)
+						easyjsonE910b2f5DecodeGithubComFyxgamingVmLib2(in, v4)
 					}
-					out.Events = append(out.Events, v3)
+					out.Events = append(out.Events, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
-		case "spawn":
+		case "children":
 			if in.IsNull() {
 				in.Skip()
 				out.Children = nil
@@ -155,17 +153,17 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib(in *jlexer.Lexer, out *ExecCo
 					out.Children = (out.Children)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v4 *Child
+					var v5 *Child
 					if in.IsNull() {
 						in.Skip()
-						v4 = nil
+						v5 = nil
 					} else {
-						if v4 == nil {
-							v4 = new(Child)
+						if v5 == nil {
+							v5 = new(Child)
 						}
-						easyjsonE910b2f5DecodeGithubComFyxgamingVmLib4(in, v4)
+						easyjsonE910b2f5DecodeGithubComFyxgamingVmLib3(in, v5)
 					}
-					out.Children = append(out.Children, v4)
+					out.Children = append(out.Children, v5)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -187,7 +185,7 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib(out *jwriter.Writer, in ExecC
 	{
 		const prefix string = ",\"action\":"
 		out.RawString(prefix[1:])
-		out.String(string(in.Action))
+		out.Uint8(uint8(in.Action))
 	}
 	{
 		const prefix string = ",\"contract\":"
@@ -203,33 +201,33 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib(out *jwriter.Writer, in ExecC
 		out.RawString(prefix)
 		out.String(string(in.Method))
 	}
-	if in.CallData != "" {
+	if len(in.CallData) != 0 {
 		const prefix string = ",\"callData\":"
 		out.RawString(prefix)
-		out.String(string(in.CallData))
+		out.Base64Bytes(in.CallData)
 	}
 	if len(in.Stack) != 0 {
 		const prefix string = ",\"stack\":"
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v7, v8 := range in.Stack {
-				if v7 > 0 {
+			for v10, v11 := range in.Stack {
+				if v10 > 0 {
 					out.RawByte(',')
 				}
-				if v8 == nil {
+				if v11 == nil {
 					out.RawString("null")
 				} else {
-					(*v8).MarshalEasyJSON(out)
+					(*v11).MarshalEasyJSON(out)
 				}
 			}
 			out.RawByte(']')
 		}
 	}
-	if in.Parent != nil {
+	{
 		const prefix string = ",\"parent\":"
 		out.RawString(prefix)
-		easyjsonE910b2f5EncodeGithubComFyxgamingVmLib1(out, *in.Parent)
+		out.Int32(int32(in.Parent))
 	}
 	{
 		const prefix string = ",\"instance\":"
@@ -237,7 +235,7 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib(out *jwriter.Writer, in ExecC
 		if in.Instance == nil {
 			out.RawString("null")
 		} else {
-			easyjsonE910b2f5EncodeGithubComFyxgamingVmLib2(out, *in.Instance)
+			easyjsonE910b2f5EncodeGithubComFyxgamingVmLib1(out, *in.Instance)
 		}
 	}
 	if len(in.Events) != 0 {
@@ -245,32 +243,32 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib(out *jwriter.Writer, in ExecC
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v9, v10 := range in.Events {
-				if v9 > 0 {
+			for v12, v13 := range in.Events {
+				if v12 > 0 {
 					out.RawByte(',')
 				}
-				if v10 == nil {
+				if v13 == nil {
 					out.RawString("null")
 				} else {
-					easyjsonE910b2f5EncodeGithubComFyxgamingVmLib3(out, *v10)
+					easyjsonE910b2f5EncodeGithubComFyxgamingVmLib2(out, *v13)
 				}
 			}
 			out.RawByte(']')
 		}
 	}
 	if len(in.Children) != 0 {
-		const prefix string = ",\"spawn\":"
+		const prefix string = ",\"children\":"
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v11, v12 := range in.Children {
-				if v11 > 0 {
+			for v14, v15 := range in.Children {
+				if v14 > 0 {
 					out.RawByte(',')
 				}
-				if v12 == nil {
+				if v15 == nil {
 					out.RawString("null")
 				} else {
-					easyjsonE910b2f5EncodeGithubComFyxgamingVmLib4(out, *v12)
+					easyjsonE910b2f5EncodeGithubComFyxgamingVmLib3(out, *v15)
 				}
 			}
 			out.RawByte(']')
@@ -302,7 +300,7 @@ func (v *ExecContext) UnmarshalJSON(data []byte) error {
 func (v *ExecContext) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonE910b2f5DecodeGithubComFyxgamingVmLib(l, v)
 }
-func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib4(in *jlexer.Lexer, out *Child) {
+func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib3(in *jlexer.Lexer, out *Child) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -339,7 +337,12 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib4(in *jlexer.Lexer, out *Child
 		case "method":
 			out.Method = string(in.String())
 		case "callData":
-			out.CallData = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.CallData = nil
+			} else {
+				out.CallData = in.Bytes()
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -350,7 +353,7 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib4(in *jlexer.Lexer, out *Child
 		in.Consumed()
 	}
 }
-func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib4(out *jwriter.Writer, in Child) {
+func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib3(out *jwriter.Writer, in Child) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -371,11 +374,11 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib4(out *jwriter.Writer, in Chil
 	{
 		const prefix string = ",\"callData\":"
 		out.RawString(prefix)
-		out.String(string(in.CallData))
+		out.Base64Bytes(in.CallData)
 	}
 	out.RawByte('}')
 }
-func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib3(in *jlexer.Lexer, out *Event) {
+func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib2(in *jlexer.Lexer, out *Event) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -404,17 +407,22 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib3(in *jlexer.Lexer, out *Event
 				in.Delim('[')
 				if out.Topics == nil {
 					if !in.IsDelim(']') {
-						out.Topics = make([]string, 0, 4)
+						out.Topics = make([][]uint8, 0, 2)
 					} else {
-						out.Topics = []string{}
+						out.Topics = [][]uint8{}
 					}
 				} else {
 					out.Topics = (out.Topics)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v16 string
-					v16 = string(in.String())
-					out.Topics = append(out.Topics, v16)
+					var v22 []uint8
+					if in.IsNull() {
+						in.Skip()
+						v22 = nil
+					} else {
+						v22 = in.Bytes()
+					}
+					out.Topics = append(out.Topics, v22)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -429,7 +437,7 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib3(in *jlexer.Lexer, out *Event
 		in.Consumed()
 	}
 }
-func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib3(out *jwriter.Writer, in Event) {
+func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib2(out *jwriter.Writer, in Event) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -445,18 +453,18 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib3(out *jwriter.Writer, in Even
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v17, v18 := range in.Topics {
-				if v17 > 0 {
+			for v24, v25 := range in.Topics {
+				if v24 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v18))
+				out.Base64Bytes(v25)
 			}
 			out.RawByte(']')
 		}
 	}
 	out.RawByte('}')
 }
-func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib2(in *jlexer.Lexer, out *Instance) {
+func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Instance) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -475,6 +483,16 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib2(in *jlexer.Lexer, out *Insta
 			continue
 		}
 		switch key {
+		case "txo":
+			if in.IsNull() {
+				in.Skip()
+				out.Txo = nil
+			} else {
+				if out.Txo == nil {
+					out.Txo = new(Txo)
+				}
+				easyjsonE910b2f5DecodeGithubComFyxgamingVmLib4(in, out.Txo)
+			}
 		case "outpoint":
 			if in.IsNull() {
 				in.Skip()
@@ -532,7 +550,19 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib2(in *jlexer.Lexer, out *Insta
 				out.Lock = in.Bytes()
 			}
 		case "store":
-			out.Storage = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.Storage = nil
+			} else {
+				out.Storage = in.Bytes()
+			}
+		case "code":
+			if in.IsNull() {
+				in.Skip()
+				out.Code = nil
+			} else {
+				out.Code = in.Bytes()
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -543,54 +573,42 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib2(in *jlexer.Lexer, out *Insta
 		in.Consumed()
 	}
 }
-func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib2(out *jwriter.Writer, in Instance) {
+func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib1(out *jwriter.Writer, in Instance) {
 	out.RawByte('{')
 	first := true
 	_ = first
+	{
+		const prefix string = ",\"txo\":"
+		out.RawString(prefix[1:])
+		if in.Txo == nil {
+			out.RawString("null")
+		} else {
+			easyjsonE910b2f5EncodeGithubComFyxgamingVmLib4(out, *in.Txo)
+		}
+	}
 	if in.Outpoint != nil {
 		const prefix string = ",\"outpoint\":"
-		first = false
-		out.RawString(prefix[1:])
+		out.RawString(prefix)
 		out.Base64Bytes(*in.Outpoint)
 	}
 	if in.Origin != nil {
 		const prefix string = ",\"origin\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Base64Bytes(*in.Origin)
 	}
 	if in.Nonce != 0 {
 		const prefix string = ",\"nonce\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Uint64(uint64(in.Nonce))
 	}
 	if in.Kind != nil {
 		const prefix string = ",\"kind\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Base64Bytes(*in.Kind)
 	}
 	{
 		const prefix string = ",\"sats\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Uint64(uint64(in.Satoshis))
 	}
 	{
@@ -598,14 +616,19 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib2(out *jwriter.Writer, in Inst
 		out.RawString(prefix)
 		out.Base64Bytes(in.Lock)
 	}
-	if in.Storage != "" {
+	if len(in.Storage) != 0 {
 		const prefix string = ",\"store\":"
 		out.RawString(prefix)
-		out.String(string(in.Storage))
+		out.Base64Bytes(in.Storage)
+	}
+	{
+		const prefix string = ",\"code\":"
+		out.RawString(prefix)
+		out.Base64Bytes(in.Code)
 	}
 	out.RawByte('}')
 }
-func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Parent) {
+func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib4(in *jlexer.Lexer, out *Txo) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -624,8 +647,6 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Paren
 			continue
 		}
 		switch key {
-		case "idx":
-			out.Idx = int(in.Int())
 		case "outpoint":
 			if in.IsNull() {
 				in.Skip()
@@ -641,21 +662,8 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Paren
 					*out.Outpoint = in.Bytes()
 				}
 			}
-		case "kind":
-			if in.IsNull() {
-				in.Skip()
-				out.Kind = nil
-			} else {
-				if out.Kind == nil {
-					out.Kind = new(Outpoint)
-				}
-				if in.IsNull() {
-					in.Skip()
-					*out.Kind = nil
-				} else {
-					*out.Kind = in.Bytes()
-				}
-			}
+		case "sats":
+			out.Satoshis = uint64(in.Uint64())
 		case "lock":
 			if in.IsNull() {
 				in.Skip()
@@ -663,23 +671,18 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Paren
 			} else {
 				out.Lock = in.Bytes()
 			}
-		case "origin":
+		case "Script":
 			if in.IsNull() {
 				in.Skip()
-				out.Origin = nil
+				out.Script = nil
 			} else {
-				if out.Origin == nil {
-					out.Origin = new(Outpoint)
+				if out.Script == nil {
+					out.Script = new(bscript.Script)
 				}
-				if in.IsNull() {
-					in.Skip()
-					*out.Origin = nil
-				} else {
-					*out.Origin = in.Bytes()
+				if data := in.Raw(); in.Ok() {
+					in.AddError((*out.Script).UnmarshalJSON(data))
 				}
 			}
-		case "nonce":
-			out.Nonce = uint64(in.Uint64())
 		default:
 			in.SkipRecursive()
 		}
@@ -690,32 +693,25 @@ func easyjsonE910b2f5DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Paren
 		in.Consumed()
 	}
 }
-func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib1(out *jwriter.Writer, in Parent) {
+func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib4(out *jwriter.Writer, in Txo) {
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
-		const prefix string = ",\"idx\":"
-		out.RawString(prefix[1:])
-		out.Int(int(in.Idx))
-	}
-	{
+	if in.Outpoint != nil {
 		const prefix string = ",\"outpoint\":"
-		out.RawString(prefix)
-		if in.Outpoint == nil {
-			out.RawString("null")
-		} else {
-			out.Base64Bytes(*in.Outpoint)
-		}
+		first = false
+		out.RawString(prefix[1:])
+		out.Base64Bytes(*in.Outpoint)
 	}
 	{
-		const prefix string = ",\"kind\":"
-		out.RawString(prefix)
-		if in.Kind == nil {
-			out.RawString("null")
+		const prefix string = ",\"sats\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Base64Bytes(*in.Kind)
+			out.RawString(prefix)
 		}
+		out.Uint64(uint64(in.Satoshis))
 	}
 	{
 		const prefix string = ",\"lock\":"
@@ -723,18 +719,13 @@ func easyjsonE910b2f5EncodeGithubComFyxgamingVmLib1(out *jwriter.Writer, in Pare
 		out.Base64Bytes(in.Lock)
 	}
 	{
-		const prefix string = ",\"origin\":"
+		const prefix string = ",\"Script\":"
 		out.RawString(prefix)
-		if in.Origin == nil {
+		if in.Script == nil {
 			out.RawString("null")
 		} else {
-			out.Base64Bytes(*in.Origin)
+			out.Raw((*in.Script).MarshalJSON())
 		}
-	}
-	{
-		const prefix string = ",\"nonce\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.Nonce))
 	}
 	out.RawByte('}')
 }
