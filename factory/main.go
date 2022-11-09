@@ -12,7 +12,7 @@ func Initialize() (retCode int) {
 	}
 
 	this.Spawn(this.Instance.Origin, "Init", this.CallData)
-	this.Destroy()
+	this.Instance.Destroy()
 
 	return this.Return(nil)
 }

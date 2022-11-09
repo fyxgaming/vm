@@ -240,7 +240,15 @@ func easyjsonEc607727DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Insta
 				in.Skip()
 				out.Code = nil
 			} else {
-				out.Code = in.Bytes()
+				if out.Code == nil {
+					out.Code = new(Outpoint)
+				}
+				if in.IsNull() {
+					in.Skip()
+					*out.Code = nil
+				} else {
+					*out.Code = in.Bytes()
+				}
 			}
 		default:
 			in.SkipRecursive()
@@ -303,7 +311,11 @@ func easyjsonEc607727EncodeGithubComFyxgamingVmLib1(out *jwriter.Writer, in Inst
 	{
 		const prefix string = ",\"code\":"
 		out.RawString(prefix)
-		out.Base64Bytes(in.Code)
+		if in.Code == nil {
+			out.RawString("null")
+		} else {
+			out.Base64Bytes(*in.Code)
+		}
 	}
 	out.RawByte('}')
 }
