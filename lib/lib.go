@@ -20,6 +20,12 @@ func Initialize() (exec *ExecContext, err error) {
 	return
 }
 
+func (i *Instance) Destroy() {
+	i.Satoshis = 0
+	i.Lock = []byte{}
+	// i.Storage = []byte{}
+}
+
 type Txo struct {
 	Outpoint *Outpoint `json:"outpoint,omitempty"`
 	Satoshis uint64    `json:"sats"`
@@ -35,13 +41,13 @@ type Instance struct {
 	Kind     *Outpoint `json:"kind,omitempty"`
 	Satoshis uint64    `json:"sats"`
 	Lock     []byte    `json:"lock"`
-	Storage  string    `json:"store,omitempty"`
+	Storage  []byte    `json:"store,omitempty"`
 }
 
 type Child struct {
 	Contract *Outpoint `json:"contract"`
 	Method   string    `json:"method"`
-	CallData string    `json:"callData"`
+	CallData []byte    `json:"callData"`
 }
 
 type Parent struct {
@@ -55,7 +61,7 @@ type Parent struct {
 
 type Event struct {
 	Id     string   `json:"id"`
-	Topics []string `json:"topics"`
+	Topics [][]byte `json:"topics"`
 }
 
 type Error struct {

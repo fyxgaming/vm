@@ -19,6 +19,7 @@ var Validator []byte = []byte{}
 
 func main() {}
 
+//export New
 func New() (retCode int) {
 	this, err := lib.Initialize()
 	if err != nil {
@@ -26,7 +27,7 @@ func New() (retCode int) {
 	}
 
 	fighter := types.Fighter{}
-	err = easyjson.Unmarshal([]byte(this.CallData), &fighter)
+	err = easyjson.Unmarshal(this.CallData, &fighter)
 	if err != nil {
 		return this.Return(err)
 	}
@@ -43,6 +44,7 @@ func New() (retCode int) {
 		skills.Hide,
 		types.InitialSkills[fighter.Race],
 	}
+	fighter.PveBattlesFought = 0
 	fighter.LevelUpHpBonusDice = make([]int32, 24)
 	fighter.LevelUpHpBonusMods = make([]int32, 24)
 
@@ -55,8 +57,9 @@ func RecordBattle() (retCode int) {
 		return this.Return(err)
 	}
 
+	// if this.
 	fighter := types.Fighter{}
-	err = easyjson.Unmarshal([]byte(this.Instance.Storage), &fighter)
+	err = easyjson.Unmarshal(this.Instance.Storage, &fighter)
 	if err != nil {
 		return this.Return(err)
 	}
@@ -115,13 +118,13 @@ func LevelUp() (retCode int) {
 	}
 
 	req := types.LevelUpRequest{}
-	err = easyjson.Unmarshal([]byte(this.CallData), &req)
+	err = easyjson.Unmarshal(this.CallData, &req)
 	if err != nil {
 		return this.Return(err)
 	}
 
 	fighter := types.Fighter{}
-	err = easyjson.Unmarshal([]byte(this.Instance.Storage), &fighter)
+	err = easyjson.Unmarshal(this.Instance.Storage, &fighter)
 	if err != nil {
 		return this.Return(err)
 	}

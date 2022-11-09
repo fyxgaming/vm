@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/base64"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"strconv"
@@ -32,12 +32,13 @@ func Init() (retCode int) {
 		return this.Return(fmt.Errorf("invalid-parent"))
 	}
 
-	this.Instance.Storage = strconv.FormatUint(mintReq.Supply, 10)
+	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, mintReq.Supply)
+	// binary.BigEndian.AppendUint64([]byte{}, )
 	this.Instance.Lock = mintReq.Lock
 	this.Instance.Satoshis = 1
 
 	log.Println("Emit")
-	this.Emit("transfer", []string{"", base64.StdEncoding.EncodeToString(mintReq.Lock)})
+	this.Emit("transfer", [][]byte{{}, mintReq.Lock})
 
 	log.Println("Done")
 	return this.Return(nil)
@@ -95,22 +96,22 @@ func Send() int {
 			}
 			balance -= send.Amount
 
-			this.Emit("transfer", []string{
-				base64.StdEncoding.EncodeToString(send.To),
-				base64.StdEncoding.EncodeToString(this.Instance.Lock),
-				strconv.FormatUint(send.Amount, 10),
+			this.Emit("transfer", [][]byte{
+				send.To,
+				this.Instance.Lock,
+				binary.BigEndian.AppendUint64([]byte{}, send.Amount),
 			})
 
 			sendData, err := send.MarshalJSON()
 			if err != nil {
 				return this.Return(err)
 			}
-			this.Spawn(this.Contract, "recv", string(sendData))
+			this.Spawn(this.Contract, "recv", sendData)
 
 		}
 	}
 
-	this.Instance.Storage = strconv.FormatUint(balance, 10)
+	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, balance)
 	if balance == 0 {
 		this.Destroy()
 	}
@@ -137,7 +138,7 @@ func recv() int {
 	}
 
 	this.Instance.Satoshis = 1
-	this.Instance.Storage = strconv.FormatUint(send.Amount, 10)
+	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, send.Amount)
 	this.Instance.Lock = send.To
 
 	return this.Return(nil)
@@ -159,11 +160,12 @@ func Combine() int {
 		return this.Return(err)
 	}
 
-	this.Emit("combine", []string{
+	this.Emit("combine", [][]byte{
 		this.CallData,
-		strconv.FormatUint(balance, 10),
+		binary.BigEndian.AppendUint64([]byte{}, balance),
 	})
 
-	this.Destroy()
+	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, 0)
+	this.Instance.Destroy()
 	return this.Return(nil)
 }

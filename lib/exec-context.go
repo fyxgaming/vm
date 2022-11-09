@@ -8,11 +8,20 @@ import (
 	"github.com/libsv/go-bt/v2/bscript"
 )
 
+type Action byte
+
+const (
+	Auth  Action = 0
+	Mint  Action = 1
+	Call  Action = 2
+	Spawn Action = 3
+)
+
 type ExecContext struct {
-	Action   string         `json:"action"`
+	Action   Action         `json:"action"`
 	Contract *Outpoint      `json:"contract"`
 	Method   string         `json:"method"`
-	CallData string         `json:"callData,omitempty"`
+	CallData []byte         `json:"callData,omitempty"`
 	Stack    []*ExecContext `json:"stack,omitempty"`
 	Parent   *Parent        `json:"parent,omitempty"`
 	Instance *Instance      `json:"instance"`
@@ -41,12 +50,6 @@ func (exec *ExecContext) Return(err error) (retCode int) {
 	return
 }
 
-func (e *ExecContext) Destroy() {
-	e.Instance.Satoshis = 0
-	e.Instance.Lock = []byte{}
-	e.Instance.Storage = ""
-}
-
 func (e *ExecContext) Script() (script *bscript.Script, err error) {
 	script = bscript.NewFromBytes(e.Instance.Lock)
 	if len(*script) == 0 {
@@ -63,7 +66,7 @@ func (e *ExecContext) Script() (script *bscript.Script, err error) {
 	if err != nil {
 		return
 	}
-	err = script.AppendPushDataString(e.Action)
+	err = script.AppendOpcodes(uint8(e.Action))
 	if err != nil {
 		return
 	}
@@ -94,7 +97,7 @@ func (e *ExecContext) Script() (script *bscript.Script, err error) {
 		return
 	}
 	if len(e.CallData) > 0 {
-		err = script.AppendPushDataString(e.CallData)
+		err = script.AppendPushData(e.CallData)
 		if err != nil {
 			return
 		}
@@ -119,7 +122,7 @@ func (e *ExecContext) Script() (script *bscript.Script, err error) {
 		if err != nil {
 			return
 		}
-		err = script.AppendPushDataStrings(event.Topics)
+		err = script.AppendPushDataArray(event.Topics)
 		if err != nil {
 			return
 		}
@@ -164,7 +167,7 @@ func ParseScript(script []byte) (exec *ExecContext, err error) {
 	if op, ops, done = util.Unshift(ops); done {
 		return
 	}
-	exec.Action = string(op)
+	exec.Action = Action(op[0])
 
 	// if op, ops, done = util.Unshift(ops); done {
 	// 	return
@@ -188,7 +191,7 @@ func ParseScript(script []byte) (exec *ExecContext, err error) {
 	if op, ops, done = util.Unshift(ops); done {
 		return
 	}
-	exec.CallData = string(op)
+	exec.CallData = op
 
 	if op, ops, done = util.Unshift(ops); done {
 		return
@@ -207,7 +210,7 @@ func ParseScript(script []byte) (exec *ExecContext, err error) {
 			if op, ops, done = util.Unshift(ops); done {
 				return
 			}
-			exec.Events[i].Topics = append(exec.Events[i].Topics, string(op))
+			exec.Events[i].Topics = append(exec.Events[i].Topics, op)
 		}
 	}
 
@@ -221,7 +224,7 @@ func (e *ExecContext) Build() (output *bt.Output, err error) {
 	return
 }
 
-func (e *ExecContext) Spawn(contract *Outpoint, method string, callData string) {
+func (e *ExecContext) Spawn(contract *Outpoint, method string, callData []byte) {
 	e.Children = append(e.Children, &Child{
 		Contract: contract,
 		Method:   method,
@@ -229,7 +232,7 @@ func (e *ExecContext) Spawn(contract *Outpoint, method string, callData string) 
 	})
 }
 
-func (e *ExecContext) Emit(event string, topics []string) {
+func (e *ExecContext) Emit(event string, topics [][]byte) {
 	e.Events = append(e.Events, &Event{
 		Id:     event,
 		Topics: topics,

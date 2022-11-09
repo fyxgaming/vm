@@ -6,31 +6,6 @@ import (
 	"github.com/fyxgaming/vm/lib"
 )
 
-// type StatusEffect int32
-
-// var (
-//
-//	Cursed                        StatusEffect = 0
-//	Ethereal                      StatusEffect = 1
-//	Focused                       StatusEffect = 2
-//	Hexed                         StatusEffect = 3
-//	Hidden                        StatusEffect = 4
-//	Inspired                      StatusEffect = 5
-//	Marked                        StatusEffect = 6
-//	Meditative                    StatusEffect = 7
-//	Poisoned                      StatusEffect = 8
-//	Stunned                       StatusEffect = 9
-//	Taunted                       StatusEffect = 10
-//	Poisonous                     StatusEffect = 11
-//	Demoralized                   StatusEffect = 12
-//	Swifted                       StatusEffect = 13
-//	Burning                       StatusEffect = 14
-//	ProtectedAgainstMundaneDamage StatusEffect = 15
-//	Electrocuted                  StatusEffect = 16
-//	Freezing                      StatusEffect = 17
-//
-// )
-
 var LevelCap int32 = 10
 
 var XPGains = []int32{
@@ -96,6 +71,7 @@ type BattleStart struct {
 type Player struct {
 	Pubkey  []byte
 	Payload []byte
+	IsBot   bool
 }
 
 type Battle struct {
@@ -111,6 +87,8 @@ type BattlePlayer struct {
 	Fighter *lib.Instance
 	Items   []*lib.Instance
 	Xp      int32
+	Level   int32
+	IsBot   bool
 }
 
 type BattleStatus int8

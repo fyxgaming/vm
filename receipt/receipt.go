@@ -18,7 +18,7 @@ func Grant() (retCode int) {
 	}
 
 	grant := types.BattleReceipt{}
-	err = easyjson.Unmarshal([]byte(this.CallData), &grant)
+	err = easyjson.Unmarshal(this.CallData, &grant)
 	if err != nil {
 		return this.Return(err)
 	}
@@ -36,7 +36,7 @@ func Claim() (retCode int) {
 	}
 
 	grant := types.BattleReceipt{}
-	err = easyjson.Unmarshal([]byte(this.Instance.Storage), &grant)
+	err = easyjson.Unmarshal(this.Instance.Storage, &grant)
 	if err != nil {
 		return this.Return(err)
 	}

@@ -1,6 +1,7 @@
 package types
 
-type Item struct {
-	Topics  []string
-	Storage string
+type ItemReq struct {
+	Topics  [][]byte
+	Storage []byte
+	Lock    []byte
 }
