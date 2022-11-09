@@ -42,6 +42,7 @@ type Instance struct {
 	Satoshis uint64    `json:"sats"`
 	Lock     []byte    `json:"lock"`
 	Storage  []byte    `json:"store,omitempty"`
+	Code     []byte    `json:"code"`
 }
 
 type Child struct {
@@ -50,14 +51,14 @@ type Child struct {
 	CallData []byte    `json:"callData"`
 }
 
-type Parent struct {
-	Idx      int       `json:"idx"`
-	Outpoint *Outpoint `json:"outpoint"`
-	Kind     *Outpoint `json:"kind"`
-	Lock     []byte    `json:"lock"`
-	Origin   *Outpoint `json:"origin"`
-	Nonce    uint64    `json:"nonce"`
-}
+// type Parent struct {
+// 	Idx      int       `json:"idx"`
+// 	Outpoint *Outpoint `json:"outpoint"`
+// 	Kind     *Outpoint `json:"kind"`
+// 	Lock     []byte    `json:"lock"`
+// 	Origin   *Outpoint `json:"origin"`
+// 	Nonce    uint64    `json:"nonce"`
+// }
 
 type Event struct {
 	Id     string   `json:"id"`

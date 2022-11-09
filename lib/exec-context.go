@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"encoding/binary"
+	"fmt"
 	"os"
 
 	"github.com/fyxgaming/vm/util"
@@ -11,10 +13,11 @@ import (
 type Action byte
 
 const (
-	Auth  Action = 0
-	Mint  Action = 1
-	Call  Action = 2
-	Spawn Action = 3
+	Auth   Action = 0
+	Mint   Action = 1
+	Call   Action = 2
+	Spawn  Action = 3
+	Deploy Action = 4
 )
 
 type ExecContext struct {
@@ -23,7 +26,7 @@ type ExecContext struct {
 	Method   string         `json:"method"`
 	CallData []byte         `json:"callData,omitempty"`
 	Stack    []*ExecContext `json:"stack,omitempty"`
-	Parent   *Parent        `json:"parent,omitempty"`
+	Parent   int32          `json:"parent"`
 	Instance *Instance      `json:"instance"`
 	Events   []*Event       `json:"events,omitempty"`
 	Children []*Child       `json:"children,omitempty"`
@@ -66,21 +69,15 @@ func (e *ExecContext) Script() (script *bscript.Script, err error) {
 	if err != nil {
 		return
 	}
-	err = script.AppendOpcodes(uint8(e.Action))
+	err = script.AppendPushData(binary.AppendVarint([]byte{}, int64(e.Action)))
 	if err != nil {
 		return
 	}
-	// if e.Instance.Origin != nil {
-	// 	err = script.AppendPushData(*e.Instance.Origin)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// } else {
-	// 	err = script.AppendOpcodes(bscript.OpFALSE)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// }
+
+	err = script.AppendPushData(binary.AppendVarint([]byte{}, int64(e.Parent)))
+	if err != nil {
+		return
+	}
 	if e.Contract != nil {
 		err = script.AppendPushData(*e.Contract)
 		if err != nil {
@@ -167,14 +164,23 @@ func ParseScript(script []byte) (exec *ExecContext, err error) {
 	if op, ops, done = util.Unshift(ops); done {
 		return
 	}
-	exec.Action = Action(op[0])
+	val, length := binary.Varint(op)
+	if length == 0 {
+		err = fmt.Errorf("invalid-action")
+		return
+	}
+	exec.Action = Action(val)
 
-	// if op, ops, done = util.Unshift(ops); done {
-	// 	return
-	// }
-	// if len(op) == 36 {
-	// 	exec.Instance.Origin = NewOutpointFromBytes(op)
-	// }
+	if op, ops, done = util.Unshift(ops); done {
+		return
+	}
+
+	val, length = binary.Varint(op)
+	if length == 0 || val < -1 || val > 2^16 {
+		err = fmt.Errorf("invalid-action")
+		return
+	}
+	exec.Parent = int32(val)
 
 	if op, ops, done = util.Unshift(ops); done {
 		return
