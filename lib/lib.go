@@ -42,7 +42,7 @@ type Instance struct {
 	Satoshis uint64    `json:"sats"`
 	Lock     []byte    `json:"lock"`
 	Storage  []byte    `json:"store,omitempty"`
-	Code     []byte    `json:"code"`
+	Code     *Outpoint `json:"code"`
 }
 
 type Child struct {
