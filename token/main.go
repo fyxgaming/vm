@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/fyxgaming/vm/lib"
 	"github.com/fyxgaming/vm/token/types"
@@ -27,8 +26,8 @@ func Init() (retCode int) {
 	}
 
 	// Ensure Init is being called by the contract itself
-	if this.Parent == nil ||
-		!this.Parent.Origin.Equal(*this.Contract) {
+	if this.Parent < 0 ||
+		!this.Stack[this.Parent].Instance.Origin.Equal(*this.Contract) {
 		return this.Return(fmt.Errorf("invalid-parent"))
 	}
 
@@ -55,10 +54,7 @@ func Send() int {
 		return this.Return(fmt.Errorf("invalid-send"))
 	}
 
-	balance, err := strconv.ParseUint(this.Instance.Storage, 10, 64)
-	if err != nil {
-		return this.Return(err)
-	}
+	balance := binary.BigEndian.Uint64(this.Instance.Storage)
 
 	for _, exec := range this.Stack {
 		if !exec.Instance.Kind.Equal(*this.Contract) {
@@ -69,13 +65,9 @@ func Send() int {
 				continue
 			}
 
-			if this.Instance.Outpoint.String() == e.Topics[0] {
+			if this.Instance.Outpoint.Equal(e.Topics[0]) {
 				log.Println("COMBINE", e.Topics)
-				amount, err := strconv.ParseUint(e.Topics[1], 10, 64)
-				if err != nil {
-					return this.Return(err)
-				}
-				balance += amount
+				balance += binary.BigEndian.Uint64(e.Topics[1])
 			}
 		}
 	}
@@ -113,7 +105,7 @@ func Send() int {
 
 	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, balance)
 	if balance == 0 {
-		this.Destroy()
+		this.Instance.Destroy()
 	}
 
 	return this.Return(nil)
@@ -126,8 +118,8 @@ func recv() int {
 		return this.Return(err)
 	}
 
-	if this.Parent == nil ||
-		!this.Parent.Kind.Equal(*this.Contract) {
+	if this.Parent < 0 ||
+		!this.Stack[this.Parent].Instance.Kind.Equal(*this.Contract) {
 		return this.Return(fmt.Errorf("invalid-recv"))
 	}
 
@@ -155,11 +147,7 @@ func Combine() int {
 		return this.Return(fmt.Errorf("invalid-combine"))
 	}
 
-	balance, err := strconv.ParseUint(this.Instance.Storage, 10, 64)
-	if err != nil {
-		return this.Return(err)
-	}
-
+	balance := binary.BigEndian.Uint64(this.Instance.Storage)
 	this.Emit("combine", [][]byte{
 		this.CallData,
 		binary.BigEndian.AppendUint64([]byte{}, balance),

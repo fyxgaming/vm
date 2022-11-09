@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson6601e8cdDecodeFyxVmTokenTypes(in *jlexer.Lexer, out *SendReq) {
+func easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes(in *jlexer.Lexer, out *SendReq) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -77,7 +77,7 @@ func easyjson6601e8cdDecodeFyxVmTokenTypes(in *jlexer.Lexer, out *SendReq) {
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeFyxVmTokenTypes(out *jwriter.Writer, in SendReq) {
+func easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes(out *jwriter.Writer, in SendReq) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -107,27 +107,27 @@ func easyjson6601e8cdEncodeFyxVmTokenTypes(out *jwriter.Writer, in SendReq) {
 // MarshalJSON supports json.Marshaler interface
 func (v SendReq) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeFyxVmTokenTypes(&w, v)
+	easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v SendReq) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeFyxVmTokenTypes(w, v)
+	easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *SendReq) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeFyxVmTokenTypes(&r, v)
+	easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SendReq) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeFyxVmTokenTypes(l, v)
+	easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes(l, v)
 }
-func easyjson6601e8cdDecodeFyxVmTokenTypes1(in *jlexer.Lexer, out *Send) {
+func easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes1(in *jlexer.Lexer, out *Send) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -165,7 +165,7 @@ func easyjson6601e8cdDecodeFyxVmTokenTypes1(in *jlexer.Lexer, out *Send) {
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeFyxVmTokenTypes1(out *jwriter.Writer, in Send) {
+func easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes1(out *jwriter.Writer, in Send) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -185,27 +185,27 @@ func easyjson6601e8cdEncodeFyxVmTokenTypes1(out *jwriter.Writer, in Send) {
 // MarshalJSON supports json.Marshaler interface
 func (v Send) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeFyxVmTokenTypes1(&w, v)
+	easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Send) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeFyxVmTokenTypes1(w, v)
+	easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Send) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeFyxVmTokenTypes1(&r, v)
+	easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Send) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeFyxVmTokenTypes1(l, v)
+	easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes1(l, v)
 }
-func easyjson6601e8cdDecodeFyxVmTokenTypes2(in *jlexer.Lexer, out *MintReq) {
+func easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes2(in *jlexer.Lexer, out *MintReq) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -243,7 +243,7 @@ func easyjson6601e8cdDecodeFyxVmTokenTypes2(in *jlexer.Lexer, out *MintReq) {
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeFyxVmTokenTypes2(out *jwriter.Writer, in MintReq) {
+func easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes2(out *jwriter.Writer, in MintReq) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -263,23 +263,23 @@ func easyjson6601e8cdEncodeFyxVmTokenTypes2(out *jwriter.Writer, in MintReq) {
 // MarshalJSON supports json.Marshaler interface
 func (v MintReq) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeFyxVmTokenTypes2(&w, v)
+	easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v MintReq) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeFyxVmTokenTypes2(w, v)
+	easyjson6601e8cdEncodeGithubComFyxgamingVmTokenTypes2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *MintReq) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeFyxVmTokenTypes2(&r, v)
+	easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *MintReq) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeFyxVmTokenTypes2(l, v)
+	easyjson6601e8cdDecodeGithubComFyxgamingVmTokenTypes2(l, v)
 }
