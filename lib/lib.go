@@ -80,7 +80,7 @@ func (err *Error) Error() string {
 
 type File struct {
 	Outpoint *Outpoint `json:"outpoint,omitempty"`
-	Data     []byte    `json:"data,omitempty"`
+	Data     []byte    `json:"data"`
 	Type     string    `json:"type,omitempty"`
 	Encoding string    `json:"enc,omitempty"`
 	Name     string    `json:"name,omitempty"`

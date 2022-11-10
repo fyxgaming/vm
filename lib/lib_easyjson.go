@@ -362,7 +362,7 @@ func easyjsonEc607727DecodeGithubComFyxgamingVmLib2(in *jlexer.Lexer, out *File)
 			continue
 		}
 		switch key {
-		case "Outpoint":
+		case "outpoint":
 			if in.IsNull() {
 				in.Skip()
 				out.Outpoint = nil
@@ -377,22 +377,22 @@ func easyjsonEc607727DecodeGithubComFyxgamingVmLib2(in *jlexer.Lexer, out *File)
 					*out.Outpoint = in.Bytes()
 				}
 			}
-		case "Data":
+		case "data":
 			if in.IsNull() {
 				in.Skip()
 				out.Data = nil
 			} else {
 				out.Data = in.Bytes()
 			}
-		case "Type":
+		case "type":
 			out.Type = string(in.String())
-		case "Encoding":
+		case "enc":
 			out.Encoding = string(in.String())
-		case "Name":
+		case "name":
 			out.Name = string(in.String())
-		case "Size":
+		case "size":
 			out.Size = uint32(in.Uint32())
-		case "Hash":
+		case "hash":
 			if in.IsNull() {
 				in.Skip()
 				out.Hash = nil
@@ -413,42 +413,44 @@ func easyjsonEc607727EncodeGithubComFyxgamingVmLib2(out *jwriter.Writer, in File
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
-		const prefix string = ",\"Outpoint\":"
+	if in.Outpoint != nil {
+		const prefix string = ",\"outpoint\":"
+		first = false
 		out.RawString(prefix[1:])
-		if in.Outpoint == nil {
-			out.RawString("null")
-		} else {
-			out.Base64Bytes(*in.Outpoint)
-		}
+		out.Base64Bytes(*in.Outpoint)
 	}
 	{
-		const prefix string = ",\"Data\":"
-		out.RawString(prefix)
+		const prefix string = ",\"data\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Base64Bytes(in.Data)
 	}
-	{
-		const prefix string = ",\"Type\":"
+	if in.Type != "" {
+		const prefix string = ",\"type\":"
 		out.RawString(prefix)
 		out.String(string(in.Type))
 	}
-	{
-		const prefix string = ",\"Encoding\":"
+	if in.Encoding != "" {
+		const prefix string = ",\"enc\":"
 		out.RawString(prefix)
 		out.String(string(in.Encoding))
 	}
-	{
-		const prefix string = ",\"Name\":"
+	if in.Name != "" {
+		const prefix string = ",\"name\":"
 		out.RawString(prefix)
 		out.String(string(in.Name))
 	}
-	{
-		const prefix string = ",\"Size\":"
+	if in.Size != 0 {
+		const prefix string = ",\"size\":"
 		out.RawString(prefix)
 		out.Uint32(uint32(in.Size))
 	}
-	{
-		const prefix string = ",\"Hash\":"
+	if len(in.Hash) != 0 {
+		const prefix string = ",\"hash\":"
 		out.RawString(prefix)
 		out.Base64Bytes(in.Hash)
 	}
