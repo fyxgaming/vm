@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import { AuthService } from '@fyxgaming/lib/dist/auth-service';
 import { SignedMessage } from '@fyxgaming/lib/dist/signed-message';
 import {Owner } from './lib/owner';
+import { emit } from 'process';
 
 const API = 'http://bitcoin-dev.aws.kronoverse.io:8081';
 const network = 'test';
@@ -22,10 +23,25 @@ async function main() {
         }
     });
 
+    async function emit(event, body): Promise<any> {
+        let resp = await new Promise<any>(r => {
+            socket.emit(event, JSON.stringify(body), r)
+        });
+        const {status, data} = JSON.parse(resp);
+        if(status >= 300) {
+            console.error(resp);
+            throw new Error("bad-response");
+        }
+        return data;
+    }
+
     socket.on('connect', async () => {
         let code = fs.readFileSync('../factory/fyx.wasm.gz')
-        let resp = await new Promise(r => socket.emit('cryptofights/upload', JSON.stringify({Data: code.toString('base64')}), r));
-        console.log('RESP:', resp);
+        let data = await emit('cryptofights/upload',{name:'factory.wasm.gz', data: code.toString('base64')});
+        console.log('RESP:', data);
+        // let {txid} = JSON.parse(data)
+        
+
     })
 
     socket.onAny((event, payload) => {

@@ -82,7 +82,7 @@ type File struct {
 	Outpoint *Outpoint `json:"outpoint,omitempty"`
 	Data     []byte    `json:"data,omitempty"`
 	Type     string    `json:"type,omitempty"`
-	Encoding string    `json:"end,omitempty"`
+	Encoding string    `json:"enc,omitempty"`
 	Name     string    `json:"name,omitempty"`
 	Size     uint32    `json:"size,omitempty"`
 	Hash     []byte    `json:"hash,omitempty"`
