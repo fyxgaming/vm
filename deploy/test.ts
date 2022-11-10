@@ -1,10 +1,11 @@
 process.env.NETWORK='testnet';
+import fs from 'fs';
 import { io } from 'socket.io-client';
 import { AuthService } from '@fyxgaming/lib/dist/auth-service';
 import { SignedMessage } from '@fyxgaming/lib/dist/signed-message';
 import {Owner } from './lib/owner';
 
-const API = 'https://dev.api.cryptofights.io';
+const API = 'http://bitcoin-dev.aws.kronoverse.io:8081';
 const network = 'test';
 const UN = 'shruggr';
 const PW = 'test1234';
@@ -21,8 +22,10 @@ async function main() {
         }
     });
 
-    socket.on('connect', () => {
-        console.log('Yo');
+    socket.on('connect', async () => {
+        let code = fs.readFileSync('../factory/fyx.wasm.gz')
+        let resp = await new Promise(r => socket.emit('cryptofights/upload', JSON.stringify({Data: code.toString('base64')}), r));
+        console.log('RESP:', resp);
     })
 
     socket.onAny((event, payload) => {
