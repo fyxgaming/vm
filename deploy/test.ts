@@ -1,4 +1,5 @@
 process.env.NETWORK='testnet';
+import {Address} from 'bsv';
 import fs from 'fs';
 import { io } from 'socket.io-client';
 import { AuthService } from '@fyxgaming/lib/dist/auth-service';
@@ -7,13 +8,16 @@ import {Owner } from './lib/owner';
 import { emit } from 'process';
 
 const API = 'http://bitcoin-dev.aws.kronoverse.io:8081';
+const AUTH = 'https://dev.api.cryptofights.io'
 const network = 'test';
-const UN = 'shruggr';
+const UN = 'shruggr1';
 const PW = 'test1234';
 
 async function main() {
-    const auth = new AuthService(API, network);
+    const auth = new AuthService(AUTH, network);
     const keyPair = await auth.generateKeyPair(UN, PW);
+    const bip32 = await auth.recover(UN, keyPair);
+    const address = Address.fromPrivKey(bip32.derive('m/6715768').privKey);
     const socket = io(API, {
         auth: async (cb) => {
             const payload = JSON.stringify(new SignedMessage({
@@ -23,9 +27,9 @@ async function main() {
         }
     });
 
-    async function emit(event, body): Promise<any> {
+    async function emit(event: string, body: any): Promise<any> {
         let resp = await new Promise<any>(r => {
-            socket.emit(event, JSON.stringify(body), r)
+            socket.emit(event, body, r)
         });
         const {status, data} = JSON.parse(resp);
         if(status >= 300) {
@@ -35,13 +39,36 @@ async function main() {
         return data;
     }
 
-    socket.on('connect', async () => {
-        let code = fs.readFileSync('../factory/fyx.wasm.gz')
-        let data = await emit('cryptofights/upload',{name:'factory.wasm.gz', data: code.toString('base64')});
-        console.log('RESP:', data);
-        // let {txid} = JSON.parse(data)
-        
+    async function deploy(filePath, name) {
+        let code = fs.readFileSync(filePath)
+        let data = await emit('cryptofights/upload', JSON.stringify({
+            // name:'fyx.wasm.gz', 
+            data: code.toString('base64'),
+            type: 'application/wasm',
+            enc: 'gzip'
+        }));
+        let {uploads:[upload]} = JSON.parse(data);
+        // console.log('RESP:', resp);
 
+        data = await emit('cryptofights/deploy', upload.outpoint);
+        const ctx = JSON.parse(data);
+
+        data = await emit(`cryptofights/install`, JSON.stringify({
+            name,
+            contract: ctx.ctxs[0].instance.outpoint,
+        }));
+
+        return JSON.parse(data);
+    }
+
+    socket.on('connect', async () => {
+        let data = await deploy('../factory/fyx.wasm.gz', 'factory');
+        console.log('FACTORY:', data);
+
+        data = await deploy('../token/fyx.wasm.gz', 'token');
+        console.log('TOKEN:', data);
+
+        
     })
 
     socket.onAny((event, payload) => {

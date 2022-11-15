@@ -32,25 +32,22 @@ type ExecContext struct {
 	Children []*Child       `json:"children,omitempty"`
 }
 
-func (exec *ExecContext) Return(err error) (retCode int) {
+func (exec *ExecContext) Return(err error) {
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
-		if err, ok := err.(*Error); ok {
-			retCode = err.Code
-		} else {
-			retCode = 500
-		}
+		panic("error")
 	} else {
 		retData, err := exec.MarshalJSON()
 		if err != nil {
-			return exec.Return(err)
+			exec.Return(err)
+			return
 		}
 		_, err = os.Stdout.Write(retData)
 		if err != nil {
-			return exec.Return(err)
+			exec.Return(err)
+			return
 		}
 	}
-	return
 }
 
 func (e *ExecContext) Script() (script *bscript.Script, err error) {

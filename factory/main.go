@@ -2,17 +2,18 @@ package main
 
 import "github.com/fyxgaming/vm/lib"
 
-func main() {}
+var this *lib.ExecContext
 
-//export Initialize
-func Initialize() (retCode int) {
-	this, err := lib.Initialize()
+func main() {
+	var err error
+	this, err = lib.Initialize()
 	if err != nil {
-		return this.Return(err)
+		this.Return(err)
+		return
 	}
 
 	this.Spawn(this.Instance.Origin, "Init", this.CallData)
 	this.Instance.Destroy()
 
-	return this.Return(nil)
+	this.Return(nil)
 }

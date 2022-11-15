@@ -10,25 +10,43 @@ import (
 	"github.com/mailru/easyjson"
 )
 
-func main() {}
+var this *lib.ExecContext
 
-//export Init
-func Init() (retCode int) {
-	this, err := lib.Initialize()
+func main() {
+	var err error
+	this, err = lib.Initialize()
 	if err != nil {
-		return this.Return(err)
+		this.Return(err)
+		return
 	}
 
+	switch this.Method {
+	case "Init":
+		Init()
+	case "Send":
+		Send()
+	case "recv":
+		recv()
+	case "Combine":
+		Combine()
+	}
+
+}
+
+//export Init
+func Init() {
 	mintReq := types.MintReq{}
-	err = easyjson.Unmarshal([]byte(this.CallData), &mintReq)
+	err := easyjson.Unmarshal([]byte(this.CallData), &mintReq)
 	if err != nil {
-		return this.Return(err)
+		this.Return(err)
+		return
 	}
 
 	// Ensure Init is being called by the contract itself
 	if this.Parent < 0 ||
 		!this.Stack[this.Parent].Instance.Origin.Equal(*this.Contract) {
-		return this.Return(fmt.Errorf("invalid-parent"))
+		this.Return(fmt.Errorf("invalid-parent"))
+		return
 	}
 
 	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, mintReq.Supply)
@@ -40,18 +58,20 @@ func Init() (retCode int) {
 	this.Emit("transfer", [][]byte{{}, mintReq.Lock})
 
 	log.Println("Done")
-	return this.Return(nil)
+	this.Return(nil)
 }
 
 //export Send
-func Send() int {
+func Send() {
 	this, err := lib.Initialize()
 	if err != nil {
-		return this.Return(err)
+		this.Return(err)
+		return
 	}
 
 	if !this.Instance.Kind.Equal(*this.Contract) {
-		return this.Return(fmt.Errorf("invalid-send"))
+		this.Return(fmt.Errorf("invalid-send"))
+		return
 	}
 
 	balance := binary.BigEndian.Uint64(this.Instance.Storage)
@@ -76,15 +96,17 @@ func Send() int {
 	if len(this.CallData) > 0 {
 		err = easyjson.Unmarshal([]byte(this.CallData), &sendReq)
 		if err != nil {
-			return this.Return(err)
+			this.Return(err)
+			return
 		}
 
 		for _, send := range sendReq.Sends {
 			if send.Amount > balance {
-				return this.Return(&lib.Error{
+				this.Return(&lib.Error{
 					Code: 402,
 					Err:  "insufficient-balance",
 				})
+				return
 			}
 			balance -= send.Amount
 
@@ -96,7 +118,8 @@ func Send() int {
 
 			sendData, err := send.MarshalJSON()
 			if err != nil {
-				return this.Return(err)
+				this.Return(err)
+				return
 			}
 			this.Spawn(this.Contract, "recv", sendData)
 
@@ -108,43 +131,48 @@ func Send() int {
 		this.Instance.Destroy()
 	}
 
-	return this.Return(nil)
+	this.Return(nil)
 }
 
 //export recv
-func recv() int {
+func recv() {
 	this, err := lib.Initialize()
 	if err != nil {
-		return this.Return(err)
+		this.Return(err)
+		return
 	}
 
 	if this.Parent < 0 ||
 		!this.Stack[this.Parent].Instance.Kind.Equal(*this.Contract) {
-		return this.Return(fmt.Errorf("invalid-recv"))
+		this.Return(fmt.Errorf("invalid-recv"))
+		return
 	}
 
 	var send types.Send
 	err = easyjson.Unmarshal([]byte(this.CallData), &send)
 	if err != nil {
-		return this.Return(err)
+		this.Return(err)
+		return
 	}
 
 	this.Instance.Satoshis = 1
 	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, send.Amount)
 	this.Instance.Lock = send.To
 
-	return this.Return(nil)
+	this.Return(nil)
 }
 
 //export Combine
-func Combine() int {
+func Combine() {
 	this, err := lib.Initialize()
 	if err != nil {
-		return this.Return(err)
+		this.Return(err)
+		return
 	}
 
 	if !this.Instance.Kind.Equal(*this.Contract) {
-		return this.Return(fmt.Errorf("invalid-combine"))
+		this.Return(fmt.Errorf("invalid-combine"))
+		return
 	}
 
 	balance := binary.BigEndian.Uint64(this.Instance.Storage)
@@ -155,5 +183,5 @@ func Combine() int {
 
 	this.Instance.Storage = binary.BigEndian.AppendUint64([]byte{}, 0)
 	this.Instance.Destroy()
-	return this.Return(nil)
+	this.Return(nil)
 }
