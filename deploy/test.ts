@@ -7,7 +7,7 @@ import { SignedMessage } from '@fyxgaming/lib/dist/signed-message';
 import {Owner } from './lib/owner';
 import { emit } from 'process';
 
-const API = 'http://bitcoin-dev.aws.kronoverse.io:8081';
+const API = 'https://dev.api.fyxgaming.com';
 const AUTH = 'https://dev.api.cryptofights.io'
 const network = 'test';
 const UN = 'shruggr1';
@@ -62,14 +62,30 @@ async function main() {
     }
 
     socket.on('connect', async () => {
-        let data = await deploy('../factory/fyx.wasm.gz', 'factory');
-        console.log('FACTORY:', data);
+        // let data = await deploy('../factory/fyx.wasm.gz', 'factory');
+        // console.log('FACTORY:', data);
 
-        data = await deploy('../token/fyx.wasm.gz', 'token');
-        console.log('TOKEN:', data);
+        // data = await deploy('../token/fyx.wasm.gz', 'token');
+        // console.log('TOKEN:', data);
 
-        
-    })
+        let services = JSON.parse(await emit('cryptofights/services', '{}'));
+        console.log('SERVICES:', services);
+
+        // let actions = [{
+        //     action: 2,
+        //     outpoint: services.token.contract,
+        //     service: 'factory',
+        //     method: 'Init',
+        //     callData: JSON.stringify({
+        //         supply: 1000000000,
+        //         lock: address.toTxOutScript().toBuffer().toString('base64'),
+        //     })
+        // }];
+
+        // let data = await emit('cryptofights/actions', JSON.stringify(actions));
+        // console.log("RESP:", data);
+
+    });
 
     socket.onAny((event, payload) => {
         console.log('Received', event, payload, "\n");
