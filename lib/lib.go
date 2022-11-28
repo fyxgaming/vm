@@ -27,10 +27,10 @@ func (i *Instance) Destroy() {
 }
 
 type Txo struct {
-	Outpoint *Outpoint `json:"outpoint,omitempty"`
-	Satoshis uint64    `json:"sats"`
-	Lock     []byte    `json:"lock"`
-	Script   *bscript.Script
+	Outpoint *Outpoint       `json:"outpoint,omitempty"`
+	Satoshis uint64          `json:"sats"`
+	Lock     []byte          `json:"lock"`
+	Script   *bscript.Script `json:"script"`
 }
 
 type Instance struct {

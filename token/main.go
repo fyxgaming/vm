@@ -20,6 +20,8 @@ func main() {
 		return
 	}
 
+	log.Println("Method:", this.Method)
+
 	switch this.Method {
 	case "Init":
 		Init()
@@ -35,12 +37,15 @@ func main() {
 
 //export Init
 func Init() {
+	log.Println("Init")
 	mintReq := types.MintReq{}
 	err := easyjson.Unmarshal([]byte(this.CallData), &mintReq)
 	if err != nil {
 		this.Return(err)
 		return
 	}
+
+	log.Println("Parsed", this.CallData)
 
 	// Ensure Init is being called by the contract itself
 	if this.Parent < 0 ||

@@ -28,7 +28,7 @@ export class Owner {
         const lockScript = Script.fromBuffer(Buffer.from(script, 'base64'));
         const txOut = TxOut.fromProperties(new Bn(satoshis), lockScript);
         const keyPair = KeyPair.fromPrivKey(this.bip32.derive(path).privKey);
-        const sig = await tx.asyncSign(keyPair, Sig.SIGHASH_ALL | Sig.SIGHASH_FORKID, vin, txOut.script, txOut.valueBn);
+        const sig = tx.sign(keyPair, Sig.SIGHASH_ALL | Sig.SIGHASH_FORKID, vin, txOut.script, txOut.valueBn);
         tx.txIns[vin].setScript(new Script().writeBuffer(sig.toTxFormat()).writeBuffer(keyPair.pubKey.toBuffer()));
     }
 }
