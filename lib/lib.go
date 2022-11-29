@@ -22,7 +22,7 @@ func Initialize() (exec *ExecContext, err error) {
 
 func (i *Instance) Destroy() {
 	i.Satoshis = 0
-	i.Lock = []byte{}
+	i.Lock = []byte{bscript.OpFALSE}
 	// i.Storage = []byte{}
 }
 

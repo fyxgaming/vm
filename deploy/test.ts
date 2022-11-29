@@ -65,6 +65,7 @@ async function main() {
         for(let input of signTxn.inputs) {
             owner.signVin(tx, input.vin, input.script, input.sats, 'm/6715768')
         }
+        console.log('SIGNED:', tx.toHex());
         return tx.toBuffer().toString('base64');
     }
 
