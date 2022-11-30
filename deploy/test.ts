@@ -75,7 +75,7 @@ async function main() {
 
     socket.on('connect', async () => {
         let data: any;
-        const lock = address.toTxOutScript().toBuffer().toString('hex');
+        const lock = address.toTxOutScript().toBuffer().toString('base64');
         console.log("LOCK", lock);
         // await deploy('../factory/fyx.wasm.gz', 'factory');
         // await deploy('../token/fyx.wasm.gz', 'token');
@@ -109,9 +109,13 @@ async function main() {
         
         data = await emit('cryptofights/instances', JSON.stringify({
             lock,
-            kind: Buffer.from(services.token.contract, 'base64').toString('hex'),
+            kind: services.token.contract,
         }));
         console.log('Tokens:', data);
+        const txos = JSON.parse(data);
+
+        data = await emit('cryptofights/instance', txos[0].outpoint)
+        console.log('Token:', data);
     });
 
     socket.onAny((event, payload) => {
