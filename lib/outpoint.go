@@ -2,8 +2,8 @@ package lib
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/binary"
-	"encoding/hex"
 )
 
 type Outpoint []byte
@@ -25,7 +25,7 @@ func NewOutpointFromBytes(b []byte) *Outpoint {
 }
 
 func NewOutpointFromString(s string) (*Outpoint, error) {
-	b, err := hex.DecodeString(s)
+	b, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (o Outpoint) Vout() uint32 {
 }
 
 func (o Outpoint) String() string {
-	return hex.EncodeToString(o)
+	return base64.StdEncoding.EncodeToString(o)
 }
 
 func (o *Outpoint) Equal(c []byte) bool {

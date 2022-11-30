@@ -54,9 +54,13 @@ async function main() {
         data = await emit('cryptofights/deploy', upload.outpoint);
         const ctx = JSON.parse(data);
 
+        await install(name, ctx.ctxs[0].instance.outpoint);
+    }
+
+    async function install(name, contract) {
         await emit(`cryptofights/install`, JSON.stringify({
             name,
-            contract: ctx.ctxs[0].instance.outpoint,
+            contract
         }));
     }
 
@@ -71,35 +75,43 @@ async function main() {
 
     socket.on('connect', async () => {
         let data: any;
-        await deploy('../factory/fyx.wasm.gz', 'factory');
-        await deploy('../token/fyx.wasm.gz', 'token');
+        const lock = address.toTxOutScript().toBuffer().toString('hex');
+        console.log("LOCK", lock);
+        // await deploy('../factory/fyx.wasm.gz', 'factory');
+        // await deploy('../token/fyx.wasm.gz', 'token');
 
         let services = JSON.parse(await emit('cryptofights/services', '{}'));
         console.log('SERVICES:', services);
 
-        let actions = [{
-            action: 2,
-            outpoint: services.token.contract,
-            service: 'factory',
-            method: 'Init',
-            callData: Buffer.from(JSON.stringify({
-                supply: 1000000000,
-                lock: address.toTxOutScript().toBuffer().toString('base64'),
-            }), 'utf8').toString('base64')
-        }];
+        // let actions = [{
+        //     action: 2,
+        //     outpoint: services.token.contract,
+        //     service: 'factory',
+        //     method: 'Init',
+        //     callData: Buffer.from(JSON.stringify({
+        //         supply: 1000000000,
+        //         lock,
+        //     }), 'utf8').toString('base64')
+        // }];
 
-        console.log("REQ:", actions);
+        // console.log("REQ:", actions);
 
-        data = await emit('cryptofights/actions', JSON.stringify(actions));
-        console.log("RESP:", data);
+        // data = await emit('cryptofights/actions', JSON.stringify(actions));
+        // console.log("RESP:", data);
 
-        const signTx = JSON.parse(data);
-        // console.log("SignTxn:", signTx);
-        const signedTx = sign(signTx);
-        // console.log("Signed Txn:", signedTx);
+        // const signTx = JSON.parse(data);
+        // // console.log("SignTxn:", signTx);
+        // const signedTx = sign(signTx);
+        // // console.log("Signed Txn:", signedTx);
 
-        data = await emit('cryptofights/broadcast', signedTx);
-        console.log('Broadcast:', data);
+        // data = await emit('cryptofights/broadcast', signedTx);
+        // console.log('Broadcast:', data);
+        
+        data = await emit('cryptofights/instances', JSON.stringify({
+            lock,
+            kind: Buffer.from(services.token.contract, 'base64').toString('hex'),
+        }));
+        console.log('Tokens:', data);
     });
 
     socket.onAny((event, payload) => {
