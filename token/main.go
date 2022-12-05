@@ -32,7 +32,6 @@ func main() {
 	case "Combine":
 		Combine()
 	}
-
 }
 
 //export Init

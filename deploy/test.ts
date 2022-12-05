@@ -1,5 +1,5 @@
 process.env.NETWORK = 'testnet';
-import { Address, Tx } from 'bsv';
+import { Address, Bip32, Tx } from 'bsv';
 import fs from 'fs';
 import { io } from 'socket.io-client';
 import { AuthService } from '@fyxgaming/lib/dist/auth-service';
@@ -12,13 +12,26 @@ const AUTH = 'https://dev.api.cryptofights.io'
 const network = 'test';
 const UN = 'shruggr1';
 const PW = 'test1234';
+const PATH = 'm/6715768';
 
+const actions = {
+    Auth: 0,
+    Mint: 1,
+    Call: 2,
+    Spawn: 3,
+    Deploy: 4
+};
+
+let services: any;
+let lock: string;
 async function main() {
     const auth = new AuthService(AUTH, network);
     const keyPair = await auth.generateKeyPair(UN, PW);
     const bip32 = await auth.recover(UN, keyPair);
-    const address = Address.fromPrivKey(bip32.derive('m/6715768').privKey);
+    const address = Address.fromPrivKey(bip32.derive(PATH).privKey);
     const owner = new Owner(bip32);
+    lock = address.toTxOutScript().toBuffer().toString('base64');
+    console.log("LOCK", lock);
     const socket = io(API, {
         auth: async (cb) => {
             const payload = JSON.stringify(new SignedMessage({
@@ -43,7 +56,6 @@ async function main() {
     async function deploy(filePath, name) {
         let code = fs.readFileSync(filePath)
         let data = await emit('cryptofights/upload', JSON.stringify({
-            // name:'fyx.wasm.gz', 
             data: code.toString('base64'),
             type: 'application/wasm',
             enc: 'gzip'
@@ -66,56 +78,97 @@ async function main() {
 
     function sign(signTxn): string {
         const tx = Tx.fromBuffer(Buffer.from(signTxn.rawtx, 'base64'));
-        for(let input of signTxn.inputs) {
+        for (let input of signTxn.inputs) {
             owner.signVin(tx, input.vin, input.script, input.sats, 'm/6715768')
         }
         console.log('SIGNED:', tx.toHex());
         return tx.toBuffer().toString('base64');
     }
 
+    async function doActions(actions: any[]) {
+        console.log("REQ:", actions);
+
+        let data = await emit('cryptofights/actions', JSON.stringify(actions));
+
+        const signTx = JSON.parse(data);
+        console.log("SignTxn:", signTx);
+        const signedTx = sign(signTx);
+        // console.log("Signed Txn:", signedTx);
+
+        return JSON.parse(await emit('cryptofights/broadcast', signedTx));
+    }
+
+    async function getInstances(kind: string) {
+        const data = await emit('cryptofights/instances', JSON.stringify({
+            lock,
+            kind,
+        }));
+        return JSON.parse(data);
+    }
+
+    async function load(outpoint: string) {
+        const data = await emit('cryptofights/instance', outpoint);
+        return JSON.parse(data);
+    }
+
+    async function getTokens() {
+        let txos = await getInstances(services.token.contract);
+
+        return Promise.all(txos.map(t => load(t.outpoint)));
+    }
+
     socket.on('connect', async () => {
         let data: any;
-        const lock = address.toTxOutScript().toBuffer().toString('base64');
-        console.log("LOCK", lock);
         // await deploy('../factory/fyx.wasm.gz', 'factory');
         // await deploy('../token/fyx.wasm.gz', 'token');
+        // await deploy('../notes/fyx.wasm.gz', 'notes');
 
-        let services = JSON.parse(await emit('cryptofights/services', '{}'));
+        services = JSON.parse(await emit('cryptofights/services', '{}'));
         console.log('SERVICES:', services);
 
-        // let actions = [{
-        //     action: 2,
+        const result = await doActions( [{
+            action: actions.Deploy,
+            lock
+        }]);
+        console.log('RESULT:', result)
+
+        // await doActions([{
+        //     action: actions.Call,
         //     outpoint: services.token.contract,
         //     service: 'factory',
         //     method: 'Init',
         //     callData: Buffer.from(JSON.stringify({
         //         supply: 1000000000,
-        //         lock,
+        //         lock
         //     }), 'utf8').toString('base64')
-        // }];
+        // }]);
 
-        // console.log("REQ:", actions);
 
-        // data = await emit('cryptofights/actions', JSON.stringify(actions));
-        // console.log("RESP:", data);
+        // let tokens = await getTokens(lock);
+        // tokens.forEach(t => console.log('Token:', t.outpoint, parseInt(Buffer.from(t.store, 'base64').toString('hex'), 16)))
 
-        // const signTx = JSON.parse(data);
-        // // console.log("SignTxn:", signTx);
-        // const signedTx = sign(signTx);
-        // // console.log("Signed Txn:", signedTx);
+        // const shruggr = JSON.parse(await emit('cryptofights/user/shruggr', '{}'));
+        // const bip32 = Bip32.fromString(shruggr.xpub);
+        // const dest = Address.fromPubKey(bip32.derive(PATH).pubKey).toTxOutScript().toBuffer().toString('base64')
 
-        // data = await emit('cryptofights/broadcast', signedTx);
-        // console.log('Broadcast:', data);
-        
-        data = await emit('cryptofights/instances', JSON.stringify({
-            lock,
-            kind: services.token.contract,
-        }));
-        console.log('Tokens:', data);
-        const txos = JSON.parse(data);
+        // const [token] = tokens;
 
-        data = await emit('cryptofights/instance', txos[0].outpoint)
-        console.log('Token:', data);
+        // await doActions( [{
+        //     action: actions.Call,
+        //     outpoint: token.outpoint,
+        //     service: 'token',
+        //     method: 'Send',
+        //     callData: Buffer.from(JSON.stringify({
+        //         sends: [{
+        //             to: lock,
+        //             amount: 500000000
+        //         }]
+        //     }), 'utf8').toString('base64')
+        // }]);
+
+
+        // tokens = await getTokens(lock);
+        // tokens.forEach(t => console.log('Token:', t.outpoint, parseInt(Buffer.from(t.store, 'base64').toString('hex'), 16)))
     });
 
     socket.onAny((event, payload) => {
