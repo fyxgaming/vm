@@ -34,7 +34,7 @@ type Txo struct {
 }
 
 type Instance struct {
-	Txo      *Txo      `json:"txo"`
+	Txo      *Txo      `json:"txo,omitempty"`
 	Outpoint *Outpoint `json:"outpoint,omitempty"`
 	Origin   *Outpoint `json:"origin,omitempty"`
 	Nonce    uint64    `json:"nonce,omitempty"`

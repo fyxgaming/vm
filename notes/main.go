@@ -24,6 +24,6 @@ func main() {
 	}
 	this.Instance.Satoshis = 1
 	this.Instance.Lock = req.Lock
-	this.Instance.Storage = []byte(req.Data)
+	this.Instance.Storage = []byte(req.Note)
 	this.Return(nil)
 }

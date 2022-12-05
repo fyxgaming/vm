@@ -51,6 +51,11 @@ func (exec *ExecContext) Return(err error) {
 }
 
 func (e *ExecContext) Script() (script *bscript.Script, err error) {
+	ser, err := e.MarshalJSON()
+	if err != nil {
+		return
+	}
+	fmt.Printf("Exec.Script Data: %s\n", ser)
 	script = bscript.NewFromBytes(e.Instance.Lock)
 	if len(*script) == 0 {
 		err = script.AppendOpcodes(bscript.OpFALSE)
@@ -121,10 +126,13 @@ func (e *ExecContext) Script() (script *bscript.Script, err error) {
 			return
 		}
 	}
+
+	fmt.Printf("Exec.Script Script: %x\n", script)
 	return
 }
 
 func ParseScript(script []byte) (exec *ExecContext, err error) {
+	fmt.Printf("Exec.ParseScript Script: %x\n", script)
 	ops, err := bscript.DecodeParts(script)
 	if err != nil {
 		return
@@ -217,6 +225,11 @@ func ParseScript(script []byte) (exec *ExecContext, err error) {
 		}
 	}
 
+	ser, err := exec.MarshalJSON()
+	if err != nil {
+		return
+	}
+	fmt.Printf("Exec.ParseScript Data: %s\n", ser)
 	return
 }
 

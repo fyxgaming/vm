@@ -36,8 +36,6 @@ func easyjson6601e8cdDecodeGithubComFyxgamingVmNotesTypes(in *jlexer.Lexer, out 
 			continue
 		}
 		switch key {
-		case "data":
-			out.Data = string(in.String())
 		case "lock":
 			if in.IsNull() {
 				in.Skip()
@@ -45,6 +43,8 @@ func easyjson6601e8cdDecodeGithubComFyxgamingVmNotesTypes(in *jlexer.Lexer, out 
 			} else {
 				out.Lock = in.Bytes()
 			}
+		case "note":
+			out.Note = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -60,14 +60,14 @@ func easyjson6601e8cdEncodeGithubComFyxgamingVmNotesTypes(out *jwriter.Writer, i
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"data\":"
+		const prefix string = ",\"lock\":"
 		out.RawString(prefix[1:])
-		out.String(string(in.Data))
+		out.Base64Bytes(in.Lock)
 	}
 	{
-		const prefix string = ",\"lock\":"
+		const prefix string = ",\"note\":"
 		out.RawString(prefix)
-		out.Base64Bytes(in.Lock)
+		out.String(string(in.Note))
 	}
 	out.RawByte('}')
 }
