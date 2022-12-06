@@ -133,6 +133,7 @@ func (e *ExecContext) Script() (script *bscript.Script, err error) {
 
 func ParseScript(script []byte) (exec *ExecContext, err error) {
 	fmt.Printf("Exec.ParseScript Script: %x\n", script)
+
 	ops, err := bscript.DecodeParts(script)
 	if err != nil {
 		return
@@ -182,7 +183,7 @@ func ParseScript(script []byte) (exec *ExecContext, err error) {
 
 	val, length = binary.Varint(op)
 	if length == 0 || val < -1 || val > 2^16 {
-		err = fmt.Errorf("invalid-action")
+		err = fmt.Errorf("invalid-parent")
 		return
 	}
 	exec.Parent = int32(val)
