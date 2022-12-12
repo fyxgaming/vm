@@ -43,6 +43,7 @@ type Instance struct {
 	Lock     []byte    `json:"lock"`
 	Storage  []byte    `json:"store,omitempty"`
 	Code     *Outpoint `json:"code"`
+	Creator  *Instance `json:"creator"`
 }
 
 type Child struct {
