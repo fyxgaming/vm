@@ -7,10 +7,13 @@ import { SignedMessage } from '@fyxgaming/lib/dist/signed-message';
 import { Owner } from './lib/owner';
 import { emit } from 'process';
 
-const API = 'https://dev.api.fyxgaming.com';
-const AUTH = 'https://dev.api.cryptofights.io'
+// const API = 'https://dev.api.fyxgaming.com';
+// const AUTH = 'https://dev.api.cryptofights.io';
+const API = 'http://localhost';
+const AUTH = 'http://localhost';
+
 const network = 'test';
-const UN = 'shruggr1';
+const UN = 'shruggr';
 const PW = 'test1234';
 const PATH = 'm/6715768';
 
@@ -120,22 +123,22 @@ async function main() {
     socket.on('connect', async () => {
         let data: any;
         // await deploy('../factory/fyx.wasm.gz', 'factory');
-        // await deploy('../token/fyx.wasm.gz', 'token');
+        await deploy('../token/fyx.wasm.gz', 'token');
         // await deploy('../notes/fyx.wasm.gz', 'notes');
 
         services = JSON.parse(await emit('cryptofights/services', '{}'));
         console.log('SERVICES:', services);
 
-        const result = await doActions([{
-            action: actions.Mint,
-            service: 'notes',
-            method: '',
-            callData: Buffer.from(JSON.stringify({
-                note: 'This is a note.',
-                lock
-            }), 'utf8').toString('base64')
-        }]);
-        console.log('RESULT:', result)
+        // const result = await doActions([{
+        //     action: actions.Mint,
+        //     service: 'notes',
+        //     method: 'Mint',
+        //     callData: Buffer.from(JSON.stringify({
+        //         note: 'This is a note.',
+        //         lock
+        //     }), 'utf8').toString('base64')
+        // }]);
+        // console.log('RESULT:', result)
 
         // const notes = await getInstances(services.notes.contract);
         // console.log("Notes TXOs:", notes);
