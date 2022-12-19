@@ -22,11 +22,11 @@ const (
 
 type ExecContext struct {
 	Action   Action         `json:"action"`
-	Contract *Outpoint      `json:"contract"`
-	Method   string         `json:"method"`
+	Contract *Outpoint      `json:"contract,omitempty"`
+	Method   string         `json:"method,omitempty"`
 	CallData []byte         `json:"callData,omitempty"`
 	Stack    []*ExecContext `json:"stack,omitempty"`
-	Parent   int32          `json:"parent"`
+	Parent   int32          `json:"parent,omitempty"`
 	Instance *Instance      `json:"instance"`
 	Events   []*Event       `json:"events,omitempty"`
 	Children []*Child       `json:"children,omitempty"`
