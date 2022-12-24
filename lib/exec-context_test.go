@@ -36,17 +36,25 @@ func TestScript(t *testing.T) {
 	exec.Instance = &Instance{}
 	// set the lock to a random string
 	for _, lock := range testData {
-		exec.Instance.Lock = []byte(lock)
+		log.Printf("lock: %s", lock)
+		decodedLock, err := hex.DecodeString(lock)
+		if err != nil {
+			log.Printf("Error from DecodeString: %s", err.Error())
+			t.Fail()
+		}
+		exec.Instance.Lock = decodedLock
 		// call the Script() function
 		script, err := exec.Script()
 		// check if the error is nil
 		if err != nil {
 			// if not, fail the test
+			log.Printf("Error from Script(): %s", err.Error())
 			t.Fail()
 		}
 		// check if the script is not nil
 		if script == nil {
 			// if it is, fail the test
+			log.Printf("Script() returned a nil value")
 			t.Fail()
 		}
 	}
@@ -58,8 +66,11 @@ func TestParseScript(t *testing.T) {
 	exec := &ExecContext{}
 	// create a new Instance
 	exec.Instance = &Instance{}
+	// populate method
+	exec.Method = "test"
 	// set the lock to a random script
 	for _, lock := range testData {
+		log.Printf("lock: %s", lock)
 		decodedLock, err := hex.DecodeString(lock)
 		if err != nil {
 			log.Printf("Error from DecodeString: %s", err.Error())
@@ -81,7 +92,7 @@ func TestParseScript(t *testing.T) {
 			log.Printf("Script() returned a nil value")
 		}
 		// call the ParseScript() function
-		psexec, err := ParseScript(*script)
+		psexec, err := ParseScriptASM(*script)
 		// check if the error is nil
 		if err != nil {
 			// if not, fail the test
@@ -93,8 +104,24 @@ func TestParseScript(t *testing.T) {
 			// if it is, fail the test
 			log.Printf("Error from ParseScript(): execution context returned by ParseScript for script %s is nil", lock)
 			t.Fail()
+		} else {
+			serializedExecContext, err := psexec.MarshalJSON()
+			if err != nil {
+				return
+			}
+			fmt.Printf("JSON serialized execution context: %s\n", serializedExecContext)
+			fmt.Printf("execution context instance lock: %v\n", hex.EncodeToString(psexec.Instance.Lock))
+			psExecScript, err := psexec.Script()
+			if err != nil {
+				return
+			}
+			if script.Equals(psExecScript) {
+				log.Printf("Script() and ParseScript() returned the same script")
+			} else {
+				log.Printf("Script() and ParseScript() returned different scripts")
+				t.Fail()
+			}
 		}
-		fmt.Printf("Parsed context lock value: %v\n", hex.EncodeToString(psexec.Instance.Lock))
 	}
 }
 

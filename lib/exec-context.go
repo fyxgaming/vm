@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fyxgaming/vm/util"
 	"github.com/libsv/go-bt/v2"
@@ -254,4 +255,157 @@ func (e *ExecContext) Emit(event string, topics [][]byte) {
 		Id:     event,
 		Topics: topics,
 	})
+}
+
+func ParseScriptASM(script []byte) (exec *ExecContext, err error) {
+	fmt.Printf("Exec.ParseScriptASM Script: %x\n", script)
+
+	fromBytesScript := bscript.NewFromBytes(script)
+	strScript, err := fromBytesScript.ToASM()
+	if err != nil {
+		return
+	}
+	fmt.Printf("Exec.ParseScript strscript: %s\n", strScript)
+	mystrary := strings.Split(strScript, " ")
+
+	var lock, op string
+	var ops []string
+	var done bool
+	for op, ops, done = util.Unshift(mystrary); !done; op, ops, done = util.Unshift(ops) {
+		if op == "OP_RETURN" {
+			lock = strings.TrimRight(lock, " ")
+			break
+		}
+		lock += op + " "
+	}
+	if len(lock) == 0 {
+		lock = string(bscript.OpFALSE)
+	}
+
+	lockScript, err := bscript.NewFromASM(lock)
+	if err != nil {
+		return
+	}
+
+	fmt.Printf("Exec.ParseScript Script: %s\n", lockScript)
+
+	exec = &ExecContext{
+		Instance: &Instance{
+			Lock: *lockScript,
+		},
+	}
+
+	op, ops, done = util.Unshift(ops)
+	fyxScript, err := bscript.NewFromHexString(op)
+	if err != nil {
+		return
+	}
+	if done || string(*fyxScript) != "fyx" {
+		return
+	}
+
+	if op, ops, done = util.Unshift(ops); done {
+		return
+	}
+	fyxScript, err = bscript.NewFromASM(op)
+	if err != nil {
+		return
+	}
+	val, length := binary.Varint(*fyxScript)
+	if length == 0 {
+		err = fmt.Errorf("invalid-action")
+		return
+	}
+	exec.Action = Action(val)
+
+	if op, ops, done = util.Unshift(ops); done {
+		return
+	}
+	fyxScript, err = bscript.NewFromASM(op)
+	if err != nil {
+		return
+	}
+	val, length = binary.Varint(*fyxScript)
+	if length == 0 || val < -1 || val > 2^16 {
+		err = fmt.Errorf("invalid-parent")
+		return
+	}
+	exec.Parent = int32(val)
+
+	if op, ops, done = util.Unshift(ops); done {
+		return
+	}
+	fyxScript, err = bscript.NewFromASM(op)
+	if err != nil {
+		return
+	}
+	if len(op) == 36 {
+		exec.Contract = NewOutpointFromBytes(*fyxScript)
+	}
+
+	if op, ops, done = util.Unshift(ops); done {
+		return
+	}
+	fyxScript, err = bscript.NewFromHexString(op)
+	if err != nil {
+		return
+	}
+	exec.Method = string(*fyxScript)
+
+	if op, ops, done = util.Unshift(ops); done {
+		return
+	}
+	fyxScript, err = bscript.NewFromASM(op)
+	if err != nil {
+		return
+	}
+	val, _ = binary.Varint(*fyxScript)
+	if val != int64(bscript.OpFALSE) {
+		exec.CallData = []byte(*fyxScript)
+	}
+
+	if op, ops, done = util.Unshift(ops); done {
+		return
+	}
+	fyxScript, err = bscript.NewFromASM(op)
+	if err != nil {
+		return
+	}
+	for i := uint8(0); i < []byte(*fyxScript)[0]; i++ {
+		if op, ops, done = util.Unshift(ops); done {
+			return
+		}
+		fyxScript, err = bscript.NewFromASM(op)
+		if err != nil {
+			return
+		}
+		exec.Events = append(exec.Events, &Event{
+			Id: string(*fyxScript),
+		})
+		if op, ops, done = util.Unshift(ops); done {
+			return
+		}
+		var j_fyxScript *bscript.Script
+		j_fyxScript, err = bscript.NewFromASM(op)
+		if err != nil {
+			return
+		}
+		for j := uint8(0); j < []byte(*j_fyxScript)[0]; j++ {
+			if op, ops, done = util.Unshift(ops); done {
+				return
+			}
+			j_fyxScript, err = bscript.NewFromASM(op)
+			if err != nil {
+				return
+			}
+			exec.Events[i].Topics = append(exec.Events[i].Topics, []byte(*j_fyxScript))
+		}
+	}
+
+	ser, err := exec.MarshalJSON()
+	if err != nil {
+		return
+	}
+	fmt.Printf("Exec.ParseScript Data: %s\n", ser)
+	return
 }
