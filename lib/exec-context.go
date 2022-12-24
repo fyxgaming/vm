@@ -355,7 +355,7 @@ func ParseScriptASM(script []byte) (exec *ExecContext, err error) {
 	if op, ops, done = util.Unshift(ops); done {
 		return
 	}
-	fyxScript, err = bscript.NewFromASM(op)
+	fyxScript, err = bscript.NewFromHexString(op)
 	if err != nil {
 		return
 	}

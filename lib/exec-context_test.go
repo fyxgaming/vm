@@ -68,6 +68,8 @@ func TestParseScript(t *testing.T) {
 	exec.Instance = &Instance{}
 	// populate method
 	exec.Method = "test"
+	// populate CallData
+	exec.CallData = []byte("testdata")
 	// set the lock to a random script
 	for _, lock := range testData {
 		log.Printf("lock: %s", lock)
