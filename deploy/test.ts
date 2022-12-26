@@ -9,13 +9,13 @@ import { emit } from 'process';
 
 // const API = 'https://dev.api.fyxgaming.com';
 // const AUTH = 'https://dev.api.cryptofights.io';
-const API = 'http://localhost';
-const AUTH = 'http://localhost';
+const API = 'http://localhost:8080';
+const AUTH = 'http://localhost:8080';
 
 const network = 'test';
 const UN = 'shruggr';
 const PW = 'test1234';
-const PATH = 'm/6715768';
+const PATH = 'm/667978';
 
 const actions = {
     Auth: 0,
@@ -82,7 +82,7 @@ async function main() {
     function sign(signTxn): string {
         const tx = Tx.fromBuffer(Buffer.from(signTxn.rawtx, 'base64'));
         for (let input of signTxn.inputs) {
-            owner.signVin(tx, input.vin, input.script, input.sats, 'm/6715768')
+            owner.signVin(tx, input.vin, input.script, input.sats, PATH)
         }
         console.log('SIGNED:', tx.toHex());
         return tx.toBuffer().toString('base64');
@@ -123,8 +123,8 @@ async function main() {
     socket.on('connect', async () => {
         let data: any;
         // await deploy('../factory/fyx.wasm.gz', 'factory');
-        await deploy('../token/fyx.wasm.gz', 'token');
-        // await deploy('../notes/fyx.wasm.gz', 'notes');
+        // await deploy('../token/fyx.wasm.gz', 'token');
+        await deploy('../notes/fyx.wasm.gz', 'notes');
 
         services = JSON.parse(await emit('cryptofights/services', '{}'));
         console.log('SERVICES:', services);
