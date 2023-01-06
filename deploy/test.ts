@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 import { AuthService } from '@fyxgaming/lib/dist/auth-service';
 import { SignedMessage } from '@fyxgaming/lib/dist/signed-message';
 import { Owner } from './lib/owner';
-import { emit } from 'process';
+import { decode, encode } from '@msgpack/msgpack';
 
 // const API = 'https://dev.api.fyxgaming.com';
 // const AUTH = 'https://dev.api.cryptofights.io';

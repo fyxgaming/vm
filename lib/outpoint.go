@@ -6,6 +6,8 @@ import (
 	"encoding/binary"
 )
 
+//go:generate msgp
+
 type Outpoint []byte
 
 func NewOutpoint(txid []byte, vout uint32) *Outpoint {

@@ -61,7 +61,7 @@ func easyjsonEc607727DecodeGithubComFyxgamingVmLib(in *jlexer.Lexer, out *Txo) {
 			} else {
 				out.Lock = in.Bytes()
 			}
-		case "Script":
+		case "script":
 			if in.IsNull() {
 				in.Skip()
 				out.Script = nil
@@ -109,7 +109,7 @@ func easyjsonEc607727EncodeGithubComFyxgamingVmLib(out *jwriter.Writer, in Txo) 
 		out.Base64Bytes(in.Lock)
 	}
 	{
-		const prefix string = ",\"Script\":"
+		const prefix string = ",\"script\":"
 		out.RawString(prefix)
 		if in.Script == nil {
 			out.RawString("null")
@@ -250,6 +250,16 @@ func easyjsonEc607727DecodeGithubComFyxgamingVmLib1(in *jlexer.Lexer, out *Insta
 					*out.Code = in.Bytes()
 				}
 			}
+		case "creator":
+			if in.IsNull() {
+				in.Skip()
+				out.Creator = nil
+			} else {
+				if out.Creator == nil {
+					out.Creator = new(Instance)
+				}
+				(*out.Creator).UnmarshalEasyJSON(in)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -264,38 +274,60 @@ func easyjsonEc607727EncodeGithubComFyxgamingVmLib1(out *jwriter.Writer, in Inst
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if in.Txo != nil {
 		const prefix string = ",\"txo\":"
+		first = false
 		out.RawString(prefix[1:])
-		if in.Txo == nil {
-			out.RawString("null")
-		} else {
-			(*in.Txo).MarshalEasyJSON(out)
-		}
+		(*in.Txo).MarshalEasyJSON(out)
 	}
 	if in.Outpoint != nil {
 		const prefix string = ",\"outpoint\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Base64Bytes(*in.Outpoint)
 	}
 	if in.Origin != nil {
 		const prefix string = ",\"origin\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Base64Bytes(*in.Origin)
 	}
 	if in.Nonce != 0 {
 		const prefix string = ",\"nonce\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Uint64(uint64(in.Nonce))
 	}
 	if in.Kind != nil {
 		const prefix string = ",\"kind\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Base64Bytes(*in.Kind)
 	}
 	{
 		const prefix string = ",\"sats\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Uint64(uint64(in.Satoshis))
 	}
 	{
@@ -315,6 +347,15 @@ func easyjsonEc607727EncodeGithubComFyxgamingVmLib1(out *jwriter.Writer, in Inst
 			out.RawString("null")
 		} else {
 			out.Base64Bytes(*in.Code)
+		}
+	}
+	{
+		const prefix string = ",\"creator\":"
+		out.RawString(prefix)
+		if in.Creator == nil {
+			out.RawString("null")
+		} else {
+			(*in.Creator).MarshalEasyJSON(out)
 		}
 	}
 	out.RawByte('}')

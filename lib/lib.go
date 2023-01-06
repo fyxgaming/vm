@@ -10,6 +10,8 @@ import (
 	"github.com/mailru/easyjson"
 )
 
+//go:generate msgp
+
 func Initialize() (exec *ExecContext, err error) {
 	EXEC := os.Getenv("EXEC")
 	exec = &ExecContext{}

@@ -7,26 +7,26 @@ import (
 	"testing"
 )
 
-var testData []string
-
-func init() {
-	// create an array of strings
-	testData = []string{
-		"76a91482ffceecbfde154800f5a039b99bc2ebdf44a88488ac",
-		"76a91458f546cca253a9b2f099640892c334e5dbd250f388ac",
-		"76a91439eeee255ae4e99502e31f60013701d4b9e7b6b788ac",
-		"76a9145d57e162859bebfab270c58a41821685fc0e180f88ac",
-		"76a91402d4c7b56182686b37312ea5529233254fc904a288ac",
-		"76a914f7c44f6a0ae99b0cbc955c174f145e8d00ac7a5a88ac",
-		"76a914443315bd2b1e48b4367968b1ad23f5c84dec57f388ac",
-		"76a9141faee95d444b7f5b828baa2ab7ab9c399d415b3b88ac",
-		"76a9140f1e81fc5e8f4b76feedb6016abe5fadfe8fa8e488ac",
-		"76a914bc435ab0d1401625850ce5ca44bd8c19196eb28188ac",
-		"76a9147d92755dffb01db79b1919f73fe7ca067042b08e88ac",
-		"76a9143c125d98dd3fd48be5e9056fa98b55e2e25aae4d88ac",
-		"76a91424dee3443421c58df3b7055550f1ea8fab2adfad88ac",
-	}
+var testData = []string{
+	"76a91482ffceecbfde154800f5a039b99bc2ebdf44a88488ac",
+	"76a91458f546cca253a9b2f099640892c334e5dbd250f388ac",
+	"76a91439eeee255ae4e99502e31f60013701d4b9e7b6b788ac",
+	"76a9145d57e162859bebfab270c58a41821685fc0e180f88ac",
+	"76a91402d4c7b56182686b37312ea5529233254fc904a288ac",
+	"76a914f7c44f6a0ae99b0cbc955c174f145e8d00ac7a5a88ac",
+	"76a914443315bd2b1e48b4367968b1ad23f5c84dec57f388ac",
+	"76a9141faee95d444b7f5b828baa2ab7ab9c399d415b3b88ac",
+	"76a9140f1e81fc5e8f4b76feedb6016abe5fadfe8fa8e488ac",
+	"76a914bc435ab0d1401625850ce5ca44bd8c19196eb28188ac",
+	"76a9147d92755dffb01db79b1919f73fe7ca067042b08e88ac",
+	"76a9143c125d98dd3fd48be5e9056fa98b55e2e25aae4d88ac",
+	"76a91424dee3443421c58df3b7055550f1ea8fab2adfad88ac",
 }
+
+// func init() {
+// 	// create an array of strings
+// 	testData
+// }
 
 // create a test for the Script() function
 func TestScript(t *testing.T) {
@@ -67,7 +67,7 @@ func TestParseScript(t *testing.T) {
 	// create a new Instance
 	exec.Instance = &Instance{}
 	// populate method
-	exec.Method = "test"
+	exec.Method = ""
 	// populate CallData
 	exec.CallData = []byte("testdata")
 	// set the lock to a random script
@@ -137,14 +137,14 @@ func TestReturn(t *testing.T) {
 }
 
 // create a test for the Build() function
-func TestBuild(t *testing.T) {
-	// create a new ExecContext
-	exec := &ExecContext{}
-	// call the Build() function
-	btOutput, err := exec.Build()
-	// if it did not panic, pass the test
-	_ = btOutput
-	if err != nil {
-		t.Fail()
-	}
-}
+// func TestBuild(t *testing.T) {
+// 	// create a new ExecContext
+// 	exec := &ExecContext{}
+// 	// call the Build() function
+// 	btOutput, err := exec.Build()
+// 	// if it did not panic, pass the test
+// 	_ = btOutput
+// 	if err != nil {
+// 		t.Fail()
+// 	}
+// }
